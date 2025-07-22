@@ -18,13 +18,12 @@ export const registerUser = async (req, res) => {
     return res.status(400).json({
       status: 'Error',
       message: 'Registration failed. User already exists.',
-      error: error,
     });
   }
 
   // Hash password
   const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+  const hashedPassword = await bcrypt.hash(password, salt);
 
   // Create user
   try {
@@ -46,4 +45,41 @@ export const registerUser = async (req, res) => {
       error,
     });
   }
+};
+
+// @desc Login user
+// @route POST /api/v1/user/login
+// @access public
+
+export const loginUser = async (req, res) => {
+  // Destructure incoming data
+  const { email, password } = req.body;
+
+  // Check if user exists by email
+  const existingUser = await User.findOne({ email }).select('+password');
+  if (!existingUser) {
+    return res.status(404).json({
+      status: 'Error',
+      message: 'These credentials do not match any account!',
+    });
+  }
+
+  //Compare provided password with registered password
+  const correctPassword = await bcrypt.compare(
+    password,
+    existingUser?.password
+  );
+
+  if (!correctPassword) {
+    return res.status(404).json({
+      status: 'Error',
+      message: 'These credentials do not match any account!',
+    });
+  }
+
+  res.status(200).json({
+    status: 'OK',
+    message: 'Login successful!',
+    existingUser,
+  });
 };
