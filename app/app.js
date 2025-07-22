@@ -3,11 +3,24 @@ dotenv.config();
 
 import express from 'express';
 import dbConnect from '../config/dbConnect.js';
-
-
-const app = express();
-
+import userRoutes from '../routes/userRoutes.js';
 
 // connect database
 dbConnect();
+
+const app = express();
+// pass incoming data to server
+app.use(express.json());
+
+// Routes
+// API health check endpoint
+app.get('/', (req, res, next) => {
+  res.status(200).json({
+    status: 'Healthy',
+    message:
+      'Your connection is healthy, and you are now in the root directory!',
+  });
+});
+app.use('/', userRoutes);
+
 export default app;
