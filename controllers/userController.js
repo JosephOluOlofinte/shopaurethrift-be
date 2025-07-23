@@ -1,5 +1,7 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
+import generateToken from '../utils/generateToken.js';
+
 
 // @desc Register user
 // @route POST /api/v1/user/register
@@ -81,5 +83,6 @@ export const loginUser = async (req, res) => {
     status: 'OK',
     message: 'Login successful!',
     existingUser,
+    token: generateToken(existingUser?._id)
   });
 };
