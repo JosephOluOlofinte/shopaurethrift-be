@@ -2,6 +2,7 @@ import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import generateToken from '../utils/generateToken.js';
 import { getTokenFromHeader } from '../utils/getTokenFromHeader.js';
+import { verifyToken } from '../utils/verifyToken.js';
 
 // @desc Register user
 // @route POST /api/v1/user/register
@@ -91,8 +92,12 @@ export const loginUser = async (req, res) => {
 // @route POST /api/v1/user/profile
 // @access Private
 export const getUserProfile = async (req, res) => {
+  // get token from header
   const token = getTokenFromHeader(req);
-  console.log(token);
+
+  // very token
+  const verified = verifyToken(token);
+
   res.json({
     status: 'success',
     message: 'Welcome to your profile!',
