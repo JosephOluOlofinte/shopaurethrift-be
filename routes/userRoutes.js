@@ -1,9 +1,14 @@
-import express from "express";
-import { loginUser, registerUser } from "../controllers/userController.js";
+import express from 'express';
+import {
+  getUserProfile,
+  loginUser,
+  registerUser,
+} from '../controllers/userController.js';
 
 const userRoutes = express.Router();
 
-userRoutes.post('/api/v1/user/register', registerUser);
-userRoutes.post('/api/v1/user/login', loginUser);
+userRoutes.post('/register', registerUser);
+userRoutes.post('/login', loginUser);
+userRoutes.get('/profile', getUserProfile);
 
 export default userRoutes;

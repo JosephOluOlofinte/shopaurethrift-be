@@ -1,7 +1,7 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import generateToken from '../utils/generateToken.js';
-
+import { getTokenFromHeader } from '../utils/getTokenFromHeader.js';
 
 // @desc Register user
 // @route POST /api/v1/user/register
@@ -83,6 +83,18 @@ export const loginUser = async (req, res) => {
     status: 'OK',
     message: 'Login successful!',
     existingUser,
-    token: generateToken(existingUser?._id)
+    token: generateToken(existingUser?._id),
+  });
+};
+
+// @desc User profile
+// @route POST /api/v1/user/profile
+// @access Private
+export const getUserProfile = async (req, res) => {
+  const token = getTokenFromHeader(req);
+  console.log(token);
+  res.json({
+    status: 'success',
+    message: 'Welcome to your profile!',
   });
 };

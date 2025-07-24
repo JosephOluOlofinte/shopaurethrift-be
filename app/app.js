@@ -22,6 +22,6 @@ app.get('/', (req, res, next) => {
       'Your connection is healthy, and you are now in the root directory!',
   });
 });
-app.use('/', userRoutes);
+app.use('/api/v1/user/', userRoutes);
 
 export default app;
