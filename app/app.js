@@ -23,7 +23,7 @@ app.get('/', (req, res, next) => {
       'Your connection is healthy, and you are now in the root directory!',
   });
 });
-app.use('/api/v1/user/', userRoutes);
+app.use('/api/v1/users/', userRoutes);
 app.use('/api/v1/products/', productRoutes);
 
 export default app;

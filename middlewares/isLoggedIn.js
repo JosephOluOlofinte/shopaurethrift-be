@@ -7,7 +7,6 @@ export const isLoggedIn = (req, res, next) => {
 
   // verify token
   const decodedUser = verifyToken(token);
-  console.log(decodedUser);
 
   // throw error if token is invalid
   if (!decodedUser) {

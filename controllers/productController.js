@@ -1,4 +1,4 @@
-import { CONFLICT, CREATED } from '../app/constants/httpStatusCodes.js';
+import { CONFLICT, CREATED, OK } from '../app/constants/httpStatusCodes.js';
 import Product from '../models/Product.js';
 
 // @desc    create new product
@@ -49,3 +49,17 @@ export const createNewProduct = async (req, res) => {
         product,
     })
 };
+
+
+// @desc    fetch all products
+// @route   POST /api/v1/products/get-products
+// @access  Public
+export const getProducts = async (req, res) => {
+    const products = await Product.find();
+
+    res.status(OK).json({
+        status: 'success',
+        message: 'Products fetched successfully.',
+        products
+    });
+}
