@@ -4,6 +4,7 @@ dotenv.config();
 import express from 'express';
 import dbConnect from '../config/dbConnect.js';
 import userRoutes from '../routes/userRoutes.js';
+import productRoutes from '../routes/productRoutes.js';
 
 
 // connect database
@@ -23,5 +24,6 @@ app.get('/', (req, res, next) => {
   });
 });
 app.use('/api/v1/user/', userRoutes);
+app.use('/api/v1/products/', productRoutes);
 
 export default app;
