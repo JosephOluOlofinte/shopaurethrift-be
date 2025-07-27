@@ -39,27 +39,71 @@ export const createNewProduct = async (req, res) => {
     price,
     totalQty,
   });
-    
-    // push product into its category
 
-    // send response
-    res.status(CREATED).json({
-        status: 'success',
-        message: 'Product created successfully',
-        product,
-    })
+  // push product into its category
+
+  // send response
+  res.status(CREATED).json({
+    status: 'success',
+    message: 'Product created successfully',
+    product,
+  });
 };
-
 
 // @desc    fetch all products
 // @route   POST /api/v1/products/get-products
 // @access  Public
 export const getProducts = async (req, res) => {
-    const products = await Product.find();
+  // query
+  let productQuery = Product.find();
+  console.log(productQuery);
 
-    res.status(OK).json({
-        status: 'success',
-        message: 'Products fetched successfully.',
-        products
+  // search product by name
+  const name = req.query.name;
+  if (name) {
+    productQuery = productQuery.find({
+      name: { $regex: name, $options: 'i' },
     });
-}
+  }
+
+  // search product by brand
+  const brand = req.query.brand;
+  if (brand) {
+    productQuery = productQuery.find({
+      brand: { $regex: brand, $options: 'i' },
+    });
+  }
+
+  // search product by category
+  const category = req.query.category;
+  if (category) {
+    productQuery = productQuery.find({
+      category: { $regex: category, $options: 'i' },
+    });
+  }
+
+  // search product by color
+  const color = req.query.colors;
+  if (color) {
+    productQuery = productQuery.find({
+      color: { $regex: color, $options: 'i' },
+    });
+  }
+
+  // search product by size
+  const size = req.query.sizes;
+  if (size) {
+    productQuery = productQuery.find({
+      size: { $regex: size, $options: 'i' },
+    });
+  }
+
+  // await the query
+  const product = await productQuery;
+
+  return res.status(OK).send({
+    status: 'success',
+    message: 'Products fetched successfully.',
+    product,
+  });
+};
