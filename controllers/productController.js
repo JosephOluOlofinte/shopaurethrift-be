@@ -1,5 +1,6 @@
 import { CONFLICT, CREATED, OK } from '../app/constants/httpStatusCodes.js';
 import Product from '../models/Product.js';
+import findProductsBy from '../utils/findProductBy.js';
 
 // @desc    create new product
 // @route   POST /api/v1/products/create-new
@@ -86,7 +87,7 @@ export const getProducts = async (req, res) => {
   const color = req.query.colors;
   if (color) {
     productQuery = productQuery.find({
-      color: { $regex: color, $options: 'i' },
+      colors: { $regex: color, $options: 'i' },
     });
   }
 
@@ -94,9 +95,19 @@ export const getProducts = async (req, res) => {
   const size = req.query.sizes;
   if (size) {
     productQuery = productQuery.find({
-      size: { $regex: size, $options: 'i' },
+      sizes: { $regex: size, $options: 'i' },
     });
   }
+
+  // findProductsBy(size, sizes);
+
+  // search product by price range
+  // const priceRange = req.query.price.split('-');
+  // if (priceRange) {
+  //   productQuery = productQuery.find({
+  //     size: { $regex: size, $options: 'i' },
+  //   });
+  // }
 
   // await the query
   const product = await productQuery;
