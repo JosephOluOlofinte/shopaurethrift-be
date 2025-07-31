@@ -1,4 +1,4 @@
-import { CONFLICT, CREATED, OK } from '../app/constants/httpStatusCodes.js';
+import { CONFLICT, CREATED, NOT_FOUND, OK } from '../app/constants/httpStatusCodes.js';
 import Product from '../models/Product.js';
 
 // @desc    create new product
@@ -51,7 +51,7 @@ export const createNewProduct = async (req, res) => {
 };
 
 // @desc    fetch all products
-// @route   POST /api/v1/products/get-products
+// @route   get /api/v1/products/get-products
 // @access  Public
 export const getProducts = async (req, res) => {
   // query
@@ -152,5 +152,48 @@ export const getProducts = async (req, res) => {
     results: products.length,
     products,
     pagination
+  });
+};
+
+
+// @desc    fetch single products
+// @route   get /api/v1/products/:id
+// @access  Public
+export const getSingleProduct = async (req, res) => {
+  const product = await Product.findById(req.params.id);
+
+  if (!product) {
+    res.status(NOT_FOUND).json({
+      status: 'error',
+      message: 'Product not found'
+    })
+  }
+
+  res.status(OK).json({
+    status: 'success',
+    message: 'Product fetched successfully',
+    product
+  })
+}
+
+// @desc    update single product
+// @route   PUT /api/v1/products/:id
+// @access  Private /Admin
+export const updateProduct = async (req, res) => {
+  const product = await Product.findById(req.params.id);
+
+
+  
+  if (!product) {
+    res.status(NOT_FOUND).json({
+      status: 'error',
+      message: 'Product not found',
+    });
+  }
+
+  res.status(OK).json({
+    status: 'success',
+    message: 'Product updated successfully',
+    product,
   });
 };
