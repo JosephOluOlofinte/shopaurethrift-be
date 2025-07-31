@@ -1,6 +1,5 @@
 import { CONFLICT, CREATED, OK } from '../app/constants/httpStatusCodes.js';
 import Product from '../models/Product.js';
-import findProductsBy from '../utils/findProductBy.js';
 
 // @desc    create new product
 // @route   POST /api/v1/products/create-new
@@ -91,6 +90,7 @@ export const getProducts = async (req, res) => {
     });
   }
 
+
   // search product by size
   const size = req.query.sizes;
   if (size) {
@@ -99,15 +99,17 @@ export const getProducts = async (req, res) => {
     });
   }
 
-  // findProductsBy(size, sizes);
 
   // search product by price range
-  // const priceRange = req.query.price.split('-');
-  // if (priceRange) {
-  //   productQuery = productQuery.find({
-  //     size: { $regex: size, $options: 'i' },
-  //   });
-  // }
+  const price = req.query.price;
+  if (price) {
+    const priceRange = price.split('-');
+    // gte: greater than or equal to
+    // lte: less than or equal to
+    productQuery = productQuery.find({
+      price: { $gte: priceRange[0], $lte: priceRange[1] },
+    });
+  }
 
   // await the query
   const product = await productQuery;
