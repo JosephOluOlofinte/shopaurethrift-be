@@ -58,7 +58,7 @@ export const getProducts = async (req, res) => {
   let productQuery = Product.find();
   console.log(productQuery);
 
-  // search product by name
+  // search products by name
   const name = req.query.name;
   if (name) {
     productQuery = productQuery.find({
@@ -111,12 +111,46 @@ export const getProducts = async (req, res) => {
     });
   }
 
+  // pagination
+  // page
+  const page = parseInt(req.query.page) ? parseInt(req.query.page) : 1;
+  // limit
+  const limit = parseInt(req.query.limit) ? parseInt(req.query.limit) : 10;
+  // startIndex
+  const startIndex = (page - 1) * limit;
+  // endIndex
+  const endIndex = page * limit
+  // total
+  const totalProducts = await Product.countDocuments();
+
+  productQuery = productQuery.skip(startIndex).limit(limit);
+
+  //  pagination results
+  const pagination = {}
+
+  if (endIndex < totalProducts) {
+    pagination.next = {
+      page: page + 1,
+      limit,
+    };
+  }
+
+  if ((startIndex > 0)) {
+    pagination.prev = {
+      page: page - 1,
+      limit,
+    }
+  }
+
   // await the query
-  const product = await productQuery;
+  const products = await productQuery;
 
   return res.status(OK).send({
     status: 'success',
     message: 'Products fetched successfully.',
-    product,
+    totalProducts,
+    results: products.length,
+    products,
+    pagination
   });
 };
