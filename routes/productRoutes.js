@@ -1,11 +1,12 @@
 import express from 'express';
-import { createNewProduct, getProducts, getSingleProduct } from '../controllers/productController.js';
+import { createNewProduct, getProducts, getSingleProduct, updateProduct } from '../controllers/productController.js';
 import { isLoggedIn } from '../middlewares/isLoggedIn.js';
 
 const productRoutes = express.Router();
 
 productRoutes.post('/', isLoggedIn, createNewProduct);
 productRoutes.get('/', getProducts);
-productRoutes.get('/:id', getSingleProduct);
+productRoutes.get('/:slug', getSingleProduct);
+productRoutes.put('/:slug', isLoggedIn, updateProduct);
 
 export default productRoutes;

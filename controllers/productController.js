@@ -1,5 +1,11 @@
-import { CONFLICT, CREATED, NOT_FOUND, OK } from '../app/constants/httpStatusCodes.js';
+import {
+  CONFLICT,
+  CREATED,
+  NOT_FOUND,
+  OK,
+} from '../app/constants/httpStatusCodes.js';
 import Product from '../models/Product.js';
+import convertProductNameToSlug from '../utils/convertProductnameToSlug.js';
 
 // @desc    create new product
 // @route   POST /api/v1/products/create-new
@@ -7,6 +13,7 @@ import Product from '../models/Product.js';
 export const createNewProduct = async (req, res) => {
   const {
     name,
+    slug,
     description,
     brand,
     category,
@@ -30,6 +37,7 @@ export const createNewProduct = async (req, res) => {
   // Create poduct
   const product = await Product.create({
     name,
+    slug: convertProductNameToSlug(name),
     description,
     brand,
     category,
@@ -90,7 +98,6 @@ export const getProducts = async (req, res) => {
     });
   }
 
-
   // search product by size
   const size = req.query.sizes;
   if (size) {
@@ -98,7 +105,6 @@ export const getProducts = async (req, res) => {
       sizes: { $regex: size, $options: 'i' },
     });
   }
-
 
   // search product by price range
   const price = req.query.price;
@@ -119,14 +125,14 @@ export const getProducts = async (req, res) => {
   // startIndex
   const startIndex = (page - 1) * limit;
   // endIndex
-  const endIndex = page * limit
+  const endIndex = page * limit;
   // total
   const totalProducts = await Product.countDocuments();
 
   productQuery = productQuery.skip(startIndex).limit(limit);
 
   //  pagination results
-  const pagination = {}
+  const pagination = {};
 
   if (endIndex < totalProducts) {
     pagination.next = {
@@ -135,11 +141,11 @@ export const getProducts = async (req, res) => {
     };
   }
 
-  if ((startIndex > 0)) {
+  if (startIndex > 0) {
     pagination.prev = {
       page: page - 1,
       limit,
-    }
+    };
   }
 
   // await the query
@@ -151,43 +157,75 @@ export const getProducts = async (req, res) => {
     totalProducts,
     results: products.length,
     products,
-    pagination
+    pagination,
   });
 };
-
 
 // @desc    fetch single products
 // @route   get /api/v1/products/:id
 // @access  Public
 export const getSingleProduct = async (req, res) => {
-  const product = await Product.findById(req.params.id);
+  const { slug } = req.params;
+
+  const product = await Product.findOne({ slug });
 
   if (!product) {
     res.status(NOT_FOUND).json({
       status: 'error',
-      message: 'Product not found'
-    })
+      message: 'Product not found',
+    });
   }
 
   res.status(OK).json({
     status: 'success',
     message: 'Product fetched successfully',
-    product
-  })
-}
+    product,
+  });
+};
 
 // @desc    update single product
 // @route   PUT /api/v1/products/:id
 // @access  Private /Admin
 export const updateProduct = async (req, res) => {
-  const product = await Product.findById(req.params.id);
+  const { productSlug } = req.params;
 
+  const {
+    name,
+    slug,
+    description,
+    brand,
+    category,
+    sizes,
+    colors,
+    user,
+    price,
+    totalQty,
+  } = req.body;
 
-  
+  // update
+  const product = await Product.findOneAndUpdate(
+    { productSlug },
+    {
+      name,
+      slug: convertProductNameToSlug(name),
+      description,
+      brand,
+      category,
+      sizes,
+      colors,
+      user,
+      price,
+      totalQty,
+    },
+    {
+      new: true,
+    }
+  );
+
   if (!product) {
     res.status(NOT_FOUND).json({
       status: 'error',
-      message: 'Product not found',
+      message: 'Product does not exist',
     });
   }
 
