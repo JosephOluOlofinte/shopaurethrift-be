@@ -52,6 +52,13 @@ export const createCategory = async (req, res) => {
 export const getAllCategories = async (req, res) => {
   const categories = await Category.find();
 
+  if (!categories) {
+    return res.status(NOT_FOUND).json({
+      status: 'error',
+      message: 'There are no existing categories.',
+    });
+  }
+
   return res.status(OK).json({
     status: 'success',
     message: 'Categories fetched succesfully',
@@ -104,7 +111,7 @@ export const updateCategory = async (req, res) => {
     {
       slug: catSlug,
     },
-    { name, slug: convertNameToSlug(name), image },
+    { name: name.toLowerCase(), slug: convertNameToSlug(name), image },
     {
       new: true,
     }

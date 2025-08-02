@@ -24,7 +24,6 @@ const UserSchema = new Schema(
         },
         slug: {
           type: String,
-          unique: true,
         },
       },
     ],
@@ -36,7 +35,6 @@ const UserSchema = new Schema(
         },
         slug: {
           type: String,
-          unique: true,
         },
       },
     ],
