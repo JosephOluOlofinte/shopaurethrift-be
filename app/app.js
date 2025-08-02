@@ -7,6 +7,7 @@ import userRoutes from '../routes/userRoutes.js';
 import productRoutes from '../routes/productRoutes.js';
 import categoryRoutes from '../routes/categoryRoutes.js';
 import brandRoutes from '../routes/brandRoutes.js';
+import colorRoutes from '../routes/colorRoutes.js';
 
 // connect database
 dbConnect();
@@ -28,5 +29,6 @@ app.use('/api/v1/users/', userRoutes);
 app.use('/api/v1/products/', productRoutes);
 app.use('/api/v1/categories/', categoryRoutes);
 app.use('/api/v1/brands/', brandRoutes);
+app.use('/api/v1/colors/', colorRoutes);
 
 export default app;

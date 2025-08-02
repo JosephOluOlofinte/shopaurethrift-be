@@ -4,6 +4,7 @@ import {
   NOT_FOUND,
   OK,
 } from '../app/constants/httpStatusCodes.js';
+import Brand from '../models/Brand.js';
 import Category from '../models/Category.js';
 import Product from '../models/Product.js';
 import convertNameToSlug from '../utils/convertNameToSlug.js';
@@ -20,7 +21,6 @@ export const createNewProduct = async (req, res) => {
     category,
     sizes,
     colors,
-    user,
     price,
     totalQty,
   } = req.body;
@@ -35,16 +35,31 @@ export const createNewProduct = async (req, res) => {
     });
   }
 
-  // find the category
-  const productCategory = await Category.findOne({
-    name: category,
+  // find the brand
+  const productBrand = await Brand.findOne({
+    name: brand.toLowerCase(),
   });
 
-  // throw error if category deos not exist
+  // throw error if brand does not exist
+  if (!productBrand) {
+    return res.status(NOT_FOUND).json({
+      status: 'error',
+      message:
+        'The brand you entered does not exist. Create it first or check the spelling.',
+    });
+  }
+
+  // find the category
+  const productCategory = await Category.findOne({
+    name: category.toLowerCase(),
+  });
+
+  // throw error if category does not exist
   if (!productCategory) {
     return res.status(NOT_FOUND).json({
       status: 'error',
-      message: 'The category you entered does not exist.',
+      message:
+        'The category you entered does not exist. Create it first or check the spelling.',
     });
   }
 
@@ -70,6 +85,15 @@ export const createNewProduct = async (req, res) => {
 
   // resave category
   await productCategory.save();
+
+  // push product into its brand
+  productBrand.products.push({
+    _id: product._id,
+    slug: product.slug,
+  });
+
+  // resave category
+  await productBrand.save();
 
   // send response
   return res.status(CREATED).json({
