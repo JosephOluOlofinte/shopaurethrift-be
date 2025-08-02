@@ -222,7 +222,7 @@ export const updateProduct = async (req, res) => {
     { slug: productSlug },
     {
       name,
-      slug: convertProductNameToSlug(name),
+      slug: convertNameToSlug(name),
       description,
       brand,
       category,
