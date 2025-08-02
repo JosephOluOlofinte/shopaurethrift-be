@@ -4,6 +4,7 @@ import {
   NOT_FOUND,
   OK,
 } from '../app/constants/httpStatusCodes.js';
+import Category from '../models/Category.js';
 import Product from '../models/Product.js';
 import convertNameToSlug from '../utils/convertNameToSlug.js';
 
@@ -28,13 +29,26 @@ export const createNewProduct = async (req, res) => {
   const productExists = await Product.findOne({ name });
 
   if (productExists) {
-    res.status(CONFLICT).json({
+    return res.status(CONFLICT).json({
       status: 'error',
       message: 'Product already exists!',
     });
   }
 
-  // Create poduct
+  // find the category
+  const productCategory = await Category.findOne({
+    name: category,
+  });
+
+  // throw error if category deos not exist
+  if (!productCategory) {
+    return res.status(NOT_FOUND).json({
+      status: 'error',
+      message: 'The category you entered does not exist.',
+    });
+  }
+
+  // Create product
   const product = await Product.create({
     name,
     slug: convertNameToSlug(name),
@@ -49,9 +63,16 @@ export const createNewProduct = async (req, res) => {
   });
 
   // push product into its category
+  productCategory.products.push({
+    _id: product._id,
+    slug: product.slug,
+  });
+
+  // resave category
+  await productCategory.save();
 
   // send response
-  res.status(CREATED).json({
+  return res.status(CREATED).json({
     status: 'success',
     message: 'Product created successfully',
     product,
@@ -174,13 +195,13 @@ export const getSingleProduct = async (req, res) => {
   const product = await Product.findOne({ slug });
 
   if (!product) {
-    res.status(NOT_FOUND).json({
+    return res.status(NOT_FOUND).json({
       status: 'error',
       message: 'Product not found',
     });
   }
 
-  res.status(OK).json({
+  return res.status(OK).json({
     status: 'success',
     message: 'Product fetched successfully',
     product,
@@ -211,7 +232,7 @@ export const updateProduct = async (req, res) => {
   // check if product exists
   const product = await Product.findOne({ slug: productSlug });
   if (!product) {
-    res.status(NOT_FOUND).json({
+    return res.status(NOT_FOUND).json({
       status: 'error',
       message: 'Product does not exist',
     });
@@ -237,7 +258,7 @@ export const updateProduct = async (req, res) => {
     }
   );
 
-  res.status(OK).json({
+  return res.status(OK).json({
     status: 'success',
     message: 'Product updated successfully',
     updatedProduct,
@@ -255,7 +276,7 @@ export const deleteProduct = async (req, res) => {
   // check if product exists
   const product = await Product.findOne({ slug: productSlug });
   if (!product) {
-    res.status(NOT_FOUND).json({
+    return res.status(NOT_FOUND).json({
       status: 'error',
       message: 'Product does not exist',
     });
@@ -267,9 +288,9 @@ export const deleteProduct = async (req, res) => {
     { new: true }
   );
 
-  res.status(OK).json({
+  return res.status(OK).json({
     status: 'success',
-    message: 'Product delete successfully Details provided below:',
+    message: 'Product deleted successfully Details provided below:',
     deletedProduct,
   });
 };

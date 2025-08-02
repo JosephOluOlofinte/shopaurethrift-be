@@ -7,7 +7,6 @@ import userRoutes from '../routes/userRoutes.js';
 import productRoutes from '../routes/productRoutes.js';
 import categoryRoutes from '../routes/categoryRoutes.js';
 
-
 // connect database
 dbConnect();
 
@@ -18,7 +17,7 @@ app.use(express.json());
 // Routes
 // API health check endpoint
 app.get('/', (req, res, next) => {
-  res.status(200).json({
+  return res.status(200).json({
     status: 'Healthy',
     message:
       'Your connection is healthy, and you are now in the root directory!',
@@ -26,6 +25,6 @@ app.get('/', (req, res, next) => {
 });
 app.use('/api/v1/users/', userRoutes);
 app.use('/api/v1/products/', productRoutes);
-app.use('/api/v1/category/', categoryRoutes);
+app.use('/api/v1/categories/', categoryRoutes);
 
 export default app;

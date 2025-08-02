@@ -3,7 +3,7 @@ import express from 'express';
 const app = express();
 
 app.get('/', (req, res) => {
-  res.send('Health OK');
+  return res.send('Health OK');
 });
 
 app.listen(4040, () => {

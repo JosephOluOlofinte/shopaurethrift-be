@@ -5,7 +5,7 @@ export const globalErrorhandler = (err, req, res, next) => {
   // Message
   const message = err?.message;
 
-  res.json({
+  return res.json({
     stack,
     message,
   });

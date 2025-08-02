@@ -45,15 +45,21 @@ const ProductSchema = new Schema(
     images: [
       {
         type: String,
-            required: true,
-        default: "https://via.placeholder.com/150"
+        required: true,
+        default: 'https://via.placeholder.com/150',
       },
     ],
 
     reviews: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Review',
+        _id: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Review',
+        },
+        slug: {
+          type: String,
+          unique: true,
+        },
       },
     ],
 
@@ -98,7 +104,7 @@ ProductSchema.virtual('averageRating').get(function () {
   product?.reviews?.forEach((review) => {
     ratingsTotal += review?.rating;
   });
-    
+
   //calc average rating
   const averageRating = Number(ratingsTotal / product?.reviews?.length).toFixed(
     1

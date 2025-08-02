@@ -36,14 +36,14 @@ export const registerUser = async (req, res) => {
       password: hashedPassword,
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       status: 'Success',
       message: 'User registered succesffully!',
       user,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
+    return res.status(500).json({
       message: 'Something went wrong',
       error,
     });
@@ -80,7 +80,7 @@ export const loginUser = async (req, res) => {
     });
   }
 
-  res.status(200).json({
+  return res.status(200).json({
     status: 'OK',
     message: 'Login successful!',
     existingUser,
@@ -98,7 +98,7 @@ export const getUserProfile = async (req, res) => {
   // very token
   const verified = verifyToken(token);
 
-  res.json({
+  return res.json({
     status: 'success',
     message: 'Welcome to your profile!',
   });
