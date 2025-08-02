@@ -5,7 +5,7 @@ import {
   OK,
 } from '../app/constants/httpStatusCodes.js';
 import Product from '../models/Product.js';
-import convertProductNameToSlug from '../utils/convertProductnameToSlug.js';
+import convertProductNameToSlug from '../utils/convertProductNameToSlug.js';
 
 // @desc    create new product
 // @route   POST /api/v1/products/create-new
@@ -162,7 +162,7 @@ export const getProducts = async (req, res) => {
 };
 
 // @desc    fetch single products
-// @route   get /api/v1/products/:id
+// @route   get /api/v1/products/:slug
 // @access  Public
 export const getSingleProduct = async (req, res) => {
   const { slug } = req.params;
@@ -184,10 +184,10 @@ export const getSingleProduct = async (req, res) => {
 };
 
 // @desc    update single product
-// @route   PUT /api/v1/products/:id
+// @route   PUT /api/v1/products/:slug
 // @access  Private /Admin
 export const updateProduct = async (req, res) => {
-  const { productSlug } = req.params;
+  const { slug: productSlug } = req.params;
 
   const {
     name,
@@ -202,9 +202,18 @@ export const updateProduct = async (req, res) => {
     totalQty,
   } = req.body;
 
+  // check if product exists
+  const product = await Product.findOne({ slug: productSlug });
+  if (!product) {
+    res.status(NOT_FOUND).json({
+      status: 'error',
+      message: 'Product does not exist',
+    });
+  }
+
   // update
-  const product = await Product.findOneAndUpdate(
-    { productSlug },
+  const updatedProduct = await Product.findOneAndUpdate(
+    { slug: productSlug },
     {
       name,
       slug: convertProductNameToSlug(name),
@@ -222,6 +231,21 @@ export const updateProduct = async (req, res) => {
     }
   );
 
+  res.status(OK).json({
+    status: 'success',
+    message: 'Product updated successfully',
+    updatedProduct,
+  });
+};
+
+// @desc    delete single product
+// @route   DELETE /api/v1/products/:slug
+// @access  Private /Admin
+export const deleteProduct = async (req, res) => {
+  const { slug: productSlug } = req.params;
+
+  // check if product exists
+  const product = await Product.findOne({ slug: productSlug });
   if (!product) {
     res.status(NOT_FOUND).json({
       status: 'error',
@@ -229,9 +253,15 @@ export const updateProduct = async (req, res) => {
     });
   }
 
+  // delete product
+  const deletedProduct = await Product.findOneAndDelete(
+    { slug: productSlug },
+    { new: true }
+  );
+
   res.status(OK).json({
     status: 'success',
-    message: 'Product updated successfully',
-    product,
+    message: 'Product delete successfully Details provided below:',
+    deletedProduct,
   });
 };
