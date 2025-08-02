@@ -5,7 +5,7 @@ import {
   OK,
 } from '../app/constants/httpStatusCodes.js';
 import Product from '../models/Product.js';
-import convertProductNameToSlug from '../utils/convertProductNameToSlug.js';
+import convertNameToSlug from '../utils/convertNameToSlug.js';
 
 // @desc    create new product
 // @route   POST /api/v1/products/create-new
@@ -37,7 +37,7 @@ export const createNewProduct = async (req, res) => {
   // Create poduct
   const product = await Product.create({
     name,
-    slug: convertProductNameToSlug(name),
+    slug: convertNameToSlug(name),
     description,
     brand,
     category,
@@ -57,6 +57,8 @@ export const createNewProduct = async (req, res) => {
     product,
   });
 };
+
+
 
 // @desc    fetch all products
 // @route   get /api/v1/products/get-products
@@ -161,6 +163,8 @@ export const getProducts = async (req, res) => {
   });
 };
 
+
+
 // @desc    fetch single products
 // @route   get /api/v1/products/:slug
 // @access  Public
@@ -182,6 +186,8 @@ export const getSingleProduct = async (req, res) => {
     product,
   });
 };
+
+
 
 // @desc    update single product
 // @route   PUT /api/v1/products/:slug
@@ -237,6 +243,8 @@ export const updateProduct = async (req, res) => {
     updatedProduct,
   });
 };
+
+
 
 // @desc    delete single product
 // @route   DELETE /api/v1/products/:slug
