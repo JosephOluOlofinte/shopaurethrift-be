@@ -8,13 +8,23 @@ const UserSchema = new Schema(
       type: String,
       required: true,
     },
+    username: {
+      type: String,
+      required: [true, 'Username is required'],
+      unique: true,
+      lowercase: true,
+    },
+    slug: {
+      type: String,
+    },
     email: {
       type: String,
-      required: true,
+      required: [true, 'Email is required'],
+      unique: true,
     },
     password: {
       type: String,
-      required: true,
+      required: [true, 'Password is required'],
     },
     orders: [
       {

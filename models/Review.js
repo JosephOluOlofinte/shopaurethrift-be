@@ -9,11 +9,14 @@ const ReviewSchema = new Schema(
       ref: "User",
       required: [true, "Review must belong to a user"],
     },
+    slug: {
+      type: String
+    },
     product: {
         _id: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Product",
-            required: [true, "Review must belong to a product"]
+            // required: [true, "Review must belong to a product"]
         },
         slug: {
             type: String,

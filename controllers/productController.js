@@ -15,7 +15,6 @@ import convertNameToSlug from '../utils/convertNameToSlug.js';
 export const createNewProduct = async (req, res) => {
   const {
     name,
-    slug,
     description,
     brand,
     category,

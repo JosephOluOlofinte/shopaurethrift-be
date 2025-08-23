@@ -7,20 +7,27 @@ import { verifyToken } from '../utils/verifyToken.js';
 // @desc Register user
 // @route POST /api/v1/user/register
 // @access Private/admin
-
 export const registerUser = async (req, res) => {
   // Destructure incoming data
-  const { fullname, email, password } = req.body;
+  const { fullname, username, email, password } = req.body;
 
-  // Check if user exists
-  const userExists = await User.findOne({ email });
+  // Check if user exists and refuse duplicates
+  const usernameExists = await User.findOne({ username });
 
-  if (userExists) {
-    // refuse registration
-
+  if (usernameExists) {
     return res.status(400).json({
       status: 'Error',
-      message: 'Registration failed. User already exists.',
+      message:
+        'Registration failed. There is an exisitng account with this username.',
+    });
+  }
+
+  const emailExists = await User.findOne({ email });
+  if (emailExists) {
+    return res.status(400).json({
+      status: 'Error',
+      message:
+        'Registration failed. There is an exisitng account with this email address.',
     });
   }
 
@@ -32,6 +39,8 @@ export const registerUser = async (req, res) => {
   try {
     const user = await User.create({
       fullname,
+      username,
+      slug: username.toLowerCase(),
       email,
       password: hashedPassword,
     });
@@ -53,7 +62,6 @@ export const registerUser = async (req, res) => {
 // @desc Login user
 // @route POST /api/v1/user/login
 // @access public
-
 export const loginUser = async (req, res) => {
   // Destructure incoming data
   const { email, password } = req.body;
@@ -95,7 +103,7 @@ export const getUserProfile = async (req, res) => {
   // get token from header
   const token = getTokenFromHeader(req);
 
-  // very token
+  // verify token
   const verified = verifyToken(token);
 
   return res.json({
