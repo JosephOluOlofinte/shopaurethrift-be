@@ -51,7 +51,7 @@ export const createBrand = async (req, res) => {
 // @route   POST /api/v1/brands
 // @access  Public
 export const getAllBrands = async (req, res) => {
-  const brands = await Brand.find();
+  const brands = await Brand.find().populate({path: 'products', select: 'name slug'});
 
   if (!brands) {
     return res.status(NOT_FOUND).json({
@@ -72,7 +72,10 @@ export const getAllBrands = async (req, res) => {
 export const getSingleBrand = async (req, res) => {
   const { slug } = req.params;
 
-  const brand = await Brand.findOne({ slug });
+  const brand = await Brand.findOne({ slug }).populate({
+    path: 'products',
+    select: 'name slug',
+  });
 
   if (!brand) {
     return res.status(NOT_FOUND).json({

@@ -38,6 +38,12 @@ const UserSchema = new Schema(
         ref: 'WishList',
       },
     ],
+    reviews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Review',
+      },
+    ],
     isAdmin: {
       type: Boolean,
       default: false,

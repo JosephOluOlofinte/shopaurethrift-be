@@ -50,7 +50,10 @@ export const createCategory = async (req, res) => {
 // @route   POST /api/v1/categories
 // @access  Public
 export const getAllCategories = async (req, res) => {
-  const categories = await Category.find();
+  const categories = await Category.find().populate({
+    path: 'products',
+    select: 'name slug',
+  });
 
   if (!categories) {
     return res.status(NOT_FOUND).json({
@@ -72,7 +75,10 @@ export const getAllCategories = async (req, res) => {
 export const getSingleCategory = async (req, res) => {
   const { slug } = req.params;
 
-  const category = await Category.findOne({ slug });
+  const category = await Category.findOne({ slug }).populate({
+    path: 'products',
+    select: 'name slug',
+  });
 
   if (!category) {
     return res.status(NOT_FOUND).json({
