@@ -94,7 +94,7 @@ export const getSingleBrand = async (req, res) => {
 export const updateBrand = async (req, res) => {
   const { slug: brandSlug } = req.params;
 
-  const { name, slug, image } = req.body;
+  const { name, image } = req.body;
 
   // throw error if brand does not exist
   const brand = await Brand.findOne({ slug: brandSlug });
@@ -114,6 +114,7 @@ export const updateBrand = async (req, res) => {
     {
       name: name.toLowerCase(),
       slug: convertNameToSlug(name),
+      image
     },
     {
       new: true,

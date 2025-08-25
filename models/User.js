@@ -28,24 +28,14 @@ const UserSchema = new Schema(
     },
     orders: [
       {
-        _id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Order',
-        },
-        slug: {
-          type: String,
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Order',
       },
     ],
     wishLists: [
       {
-        _id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'WishList',
-        },
-        slug: {
-          type: String,
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'WishList',
       },
     ],
     isAdmin: {

@@ -35,12 +35,12 @@ export const createNewProduct = async (req, res) => {
   }
 
   // find the brand
-  const productBrand = await Brand.findOne({
+  const brandExists = await Brand.findOne({
     name: brand.toLowerCase(),
   });
 
   // throw error if brand does not exist
-  if (!productBrand) {
+  if (!brandExists) {
     return res.status(NOT_FOUND).json({
       status: 'error',
       message:
@@ -49,12 +49,12 @@ export const createNewProduct = async (req, res) => {
   }
 
   // find the category
-  const productCategory = await Category.findOne({
+  const categoryExists = await Category.findOne({
     name: category.toLowerCase(),
   });
 
   // throw error if category does not exist
-  if (!productCategory) {
+  if (!categoryExists) {
     return res.status(NOT_FOUND).json({
       status: 'error',
       message:
@@ -77,22 +77,16 @@ export const createNewProduct = async (req, res) => {
   });
 
   // push product into its category
-  productCategory.products.push({
-    _id: product._id,
-    slug: product.slug,
-  });
+  categoryExists.products.push(product._id);
 
   // resave category
-  await productCategory.save();
+  await categoryExists.save();
 
   // push product into its brand
-  productBrand.products.push({
-    _id: product._id,
-    slug: product.slug,
-  });
+  brandExists.products.push(product._id);
 
   // resave category
-  await productBrand.save();
+  await brandExists.save();
 
   // send response
   return res.status(CREATED).json({
@@ -195,7 +189,7 @@ export const getProducts = async (req, res) => {
   }
 
   // await the query
-  const products = await productQuery;
+  const products = await productQuery.populate('reviews');
 
   return res.status(OK).send({
     status: 'success',
@@ -215,7 +209,7 @@ export const getProducts = async (req, res) => {
 export const getSingleProduct = async (req, res) => {
   const { slug } = req.params;
 
-  const product = await Product.findOne({ slug });
+  const product = await Product.findOne({ slug }).populate('reviews');
 
   if (!product) {
     return res.status(NOT_FOUND).json({

@@ -52,13 +52,8 @@ const ProductSchema = new Schema(
 
     reviews: [
       {
-        _id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Review',
-        },
-        slug: {
-          type: String,
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Review',
       },
     ],
 

@@ -26,19 +26,13 @@ export const createReviews = async (req, res) => {
   const review = await Review.create({
     user: req.userAuthId,
     slug: `${existingProduct.slug}/reviews/`,
-    product: {
-      _id: existingProduct?._id,
-      slug: existingProduct?.slug,
-    },
+    product: existingProduct?._id,
     message,
     rating,
   });
 
   // Push the review into 'existingProduct'
-  existingProduct.reviews.push({
-    _id: review?._id,
-    slug: review?.slug,
-  })
+  existingProduct.reviews.push(review?._id);
 
   // resave
   await existingProduct.save();

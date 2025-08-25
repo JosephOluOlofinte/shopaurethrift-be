@@ -19,13 +19,8 @@ const BrandSchema = new Schema(
     },
     products: [
       {
-        _id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Product',
-        },
-        slug: {
-          type: String,
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
       },
     ],
   },

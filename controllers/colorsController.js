@@ -94,7 +94,7 @@ export const getSingleColor = async (req, res) => {
 export const updateColor = async (req, res) => {
   const { slug: colorSlug } = req.params;
 
-  const { name, slug, image } = req.body;
+  const { name, slug } = req.body;
 
   // throw error if color does not exist
   const color = await Color.findOne({ slug: colorSlug });
