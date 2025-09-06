@@ -1,10 +1,9 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
 // generate random numbers for ordernumber
-const randomTxt = Math.random().toString(36).substring(7).toUpperCase();
-const randomNumber = Math.floor(1000 + Math.random() * 90000);
+
 
 const OrderSchema = new Schema(
   {
@@ -19,13 +18,15 @@ const OrderSchema = new Schema(
         required: true,
       },
     ],
+    orderNumber: {
+      type: String,
+    },
+    slug: {
+      type: String,
+    },
     shippingAddress: {
       type: Object,
       required: true,
-    },
-    orderNumber: {
-      type: String,
-      defaultVal: randomTxt + randomNumber,
     },
     paymentStatus: {
       type: String,
@@ -38,6 +39,10 @@ const OrderSchema = new Schema(
     currency: {
       type: String,
       default: 'Not specified',
+    },
+    totalPrice: {
+      type: Number,
+      default: '0.0',
     },
     // For admin
     orderStatus: {
