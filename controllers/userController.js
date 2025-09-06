@@ -3,9 +3,54 @@ import bcrypt from 'bcryptjs';
 import generateToken from '../utils/generateToken.js';
 import { getTokenFromHeader } from '../utils/getTokenFromHeader.js';
 import { verifyToken } from '../utils/verifyToken.js';
+import { BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from '../app/constants/httpStatusCodes.js';
+
+
+// @desc get all users
+// @route GET /api/v1/users/
+// @access Private/admin
+export const getAllUsers = async (req, res) => {
+  const users = await User.find().populate('reviews');
+
+  if (users.length < 1) {
+    return res.status(NOT_FOUND).json({
+      status: 'error',
+      message: 'There are no registered users'
+    })
+  }
+
+  return res.status(OK).json({
+    status: 'success',
+    message: 'Users fetched successfully',
+    users
+  })
+}
+
+// @desc get one user
+// @route GET /api/v1/users/username
+// @access Private/admin
+export const getOneUser = async(req, res) => {
+  const { username } = req.params;
+
+  //check if user exists
+  const user = await User.findOne({ username }).populate('reviews');
+
+  if (!user) {
+    return res.status(NOT_FOUND).json({
+      status: 'error',
+      message: 'There are no existing users with the provided credentials'
+    })
+  }
+
+  return res.status(OK).json({
+    status: 'success',
+    message: 'User fetched succesffully',
+    user
+  })
+}
 
 // @desc Register user
-// @route POST /api/v1/user/register
+// @route POST /api/v1/users/register
 // @access Private/admin
 export const registerUser = async (req, res) => {
   // Destructure incoming data
@@ -15,7 +60,7 @@ export const registerUser = async (req, res) => {
   const usernameExists = await User.findOne({ username });
 
   if (usernameExists) {
-    return res.status(400).json({
+    return res.status(BAD_REQUEST).json({
       status: 'Error',
       message:
         'Registration failed. There is an exisitng account with this username.',
@@ -24,7 +69,7 @@ export const registerUser = async (req, res) => {
 
   const emailExists = await User.findOne({ email });
   if (emailExists) {
-    return res.status(400).json({
+    return res.status(BAD_REQUEST).json({
       status: 'Error',
       message:
         'Registration failed. There is an exisitng account with this email address.',
@@ -45,14 +90,14 @@ export const registerUser = async (req, res) => {
       password: hashedPassword,
     });
 
-    return res.status(201).json({
+    return res.status(CREATED).json({
       status: 'Success',
       message: 'User registered succesffully!',
       user,
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({
+    return res.status(INTERNAL_SERVER_ERROR).json({
       message: 'Something went wrong',
       error,
     });
@@ -60,7 +105,7 @@ export const registerUser = async (req, res) => {
 };
 
 // @desc Login user
-// @route POST /api/v1/user/login
+// @route POST /api/v1/users/login
 // @access public
 export const loginUser = async (req, res) => {
   // Destructure incoming data
@@ -69,7 +114,7 @@ export const loginUser = async (req, res) => {
   // Check if user exists by email
   const existingUser = await User.findOne({ email }).select('+password');
   if (!existingUser) {
-    return res.status(404).json({
+    return res.status(NOT_FOUND).json({
       status: 'Error',
       message: 'These credentials do not match any account!',
     });
@@ -82,13 +127,13 @@ export const loginUser = async (req, res) => {
   );
 
   if (!correctPassword) {
-    return res.status(404).json({
+    return res.status(NOT_FOUND).json({
       status: 'Error',
       message: 'These credentials do not match any account!',
     });
   }
 
-  return res.status(200).json({
+  return res.status(OK).json({
     status: 'OK',
     message: 'Login successful!',
     existingUser,
@@ -97,7 +142,7 @@ export const loginUser = async (req, res) => {
 };
 
 // @desc User profile
-// @route POST /api/v1/user/profile
+// @route POST /api/v1/users/profile
 // @access Private
 export const getUserProfile = async (req, res) => {
   // get token from header
@@ -111,3 +156,5 @@ export const getUserProfile = async (req, res) => {
     message: 'Welcome to your profile!',
   });
 };
+
+

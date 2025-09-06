@@ -97,7 +97,6 @@ export const createNewProduct = async (req, res) => {
 };
 
 
-
 // @desc    fetch all products
 // @route   get /api/v1/products/get-products
 // @access  Public
