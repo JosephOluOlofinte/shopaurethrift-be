@@ -52,32 +52,12 @@ const UserSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    shippingAddress: {
-      firstName: {
-        type: String,
+    shippingAddress: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ShippingAddress',
       },
-      lastName: {
-        type: String,
-      },
-      address: {
-        type: String,
-      },
-      city: {
-        type: String,
-      },
-      postalCode: {
-        type: String,
-      },
-      province: {
-        type: String,
-      },
-      country: {
-        type: String,
-      },
-      phone: {
-        type: String,
-      },
-    },
+    ],
   },
   {
     timestamps: true,

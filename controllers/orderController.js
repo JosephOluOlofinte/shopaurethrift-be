@@ -50,11 +50,8 @@ export const createOrder = async (req, res) => {
     totalPrice,
   });
 
-  // push order into user
-  user.orders.push(order._id);
-  await user.save();
-
   // debit user via Stripe
+  // implement payment webhook
 
   // Update product quantity sold and quantity left
   const products = await Product.find({ _id: { $in: orderItems } });
@@ -70,13 +67,15 @@ export const createOrder = async (req, res) => {
     await product.save();
   });
 
-  // implement payment webhook
+  // push order into user
+  user.orders.push(order._id);
+  await user.save();
+  
   // update user order
 
   return res.status(OK).json({
     status: 'success',
     message: 'Order created successfully',
     order,
-    products,
   });
 };

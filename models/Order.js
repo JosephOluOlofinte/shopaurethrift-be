@@ -2,8 +2,6 @@ import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
-// generate random numbers for ordernumber
-
 
 const OrderSchema = new Schema(
   {
