@@ -6,6 +6,9 @@ import {
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import User from '../models/User.js';
+import Stripe from 'stripe';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // @desc create orders
 // @route Post /api/v1/orders
@@ -28,8 +31,8 @@ export const createOrder = async (req, res) => {
   if (user.hasShippingAddress == false) {
     return res.status(NOT_FOUND).json({
       status: '404. Error',
-      message: 'You must add a shipping address to place an order.'
-    })
+      message: 'You must add a shipping address to place an order.',
+    });
   }
 
   // check if order is not empty
@@ -59,6 +62,33 @@ export const createOrder = async (req, res) => {
   });
 
   // debit user via Stripe
+  // convert orderItems to Stripe structure
+  const convertedOrders = orderItems.map((item) => {
+    return {
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: item.name,
+          description: item.description,
+        },
+        unit_amount: item.price * 100,
+      },
+      quantity: item.quantity,
+    };
+  });
+
+
+  //  pass converted payload to Stripe
+  const stripe = new Stripe(process.env.STRIPE_KEY);
+  const session = await stripe.checkout.sessions.create({
+    line_items: convertedOrders,
+    mode: 'payment',
+    success_url: 'https://localhost:3000/payment/success',
+    cancel_url: 'https://localhost:3000/payment/cancel',
+  });
+
+  res.send({ url: session.url });
+
   // implement payment webhook
 
   // Update product quantity sold and quantity left
@@ -79,7 +109,7 @@ export const createOrder = async (req, res) => {
   user.orders.push(order._id);
   await user.save();
 
-  // update user order
+  // update user order details
 
   return res.status(OK).json({
     status: 'success',
