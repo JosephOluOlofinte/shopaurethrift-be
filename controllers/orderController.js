@@ -24,6 +24,14 @@ export const createOrder = async (req, res) => {
     });
   }
 
+  // check if user has shipping address
+  if (user.hasShippingAddress == false) {
+    return res.status(NOT_FOUND).json({
+      status: '404. Error',
+      message: 'You must add a shipping address to place an order.'
+    })
+  }
+
   // check if order is not empty
   if (orderItems.length <= 0) {
     return res.status(BAD_REQUEST).json({
@@ -70,7 +78,7 @@ export const createOrder = async (req, res) => {
   // push order into user
   user.orders.push(order._id);
   await user.save();
-  
+
   // update user order
 
   return res.status(OK).json({

@@ -5,7 +5,7 @@ import ShippingAddress from '../models/ShippingAddress.js';
 import User from '../models/User.js';
 
 // @desc create shipping address
-// @route Post /api/v1/:username/shipping-address
+// @route Post /api/v1/users/shipping-address
 // @access private
 export const createShippingAddress = async (req, res) => {
   // get the user
@@ -37,7 +37,7 @@ export const createShippingAddress = async (req, res) => {
   const shippingAddress = await ShippingAddress.create({
     user: username,
     addressNickname,
-    slug: addressNickname,
+    slug: addressNickname.toLowerCase(),
     firstName,
     lastName,
     address,
@@ -48,15 +48,16 @@ export const createShippingAddress = async (req, res) => {
     phone,
   });
 
-  // push address into user
+  // push address into user and update hasShippingAddress
   user.shippingAddress.push(shippingAddress._id);
+  user.hasShippingAddress = true;
   await user.save();
 
   // return success message
   return res.status(OK).json({
     status: '200. success',
     message:
-      'Shipping address added successfully. This can be edited at any time.',
+      'Shipping address added successfully. You can modify the details at any time.',
     shippingAddress,
   });
 };

@@ -18,19 +18,14 @@ userRoutes.get('/:username', isLoggedIn, getOneUser);
 userRoutes.get('/profile', isLoggedIn, getUserProfile);
 
 // shipping address routes
-userRoutes.post('/:username/shipping-address', isLoggedIn, createShippingAddress);
-userRoutes.get(
-  '/:username/shipping-address/:addressnickname',
-  isLoggedIn,
-  createShippingAddress
-);
-userRoutes.put(
-  '/:username/shipping-address/:addressnickname',
+userRoutes.post('/shipping-address', isLoggedIn, createShippingAddress);
+userRoutes.get('shipping-address/:addressnickname', isLoggedIn, createShippingAddress);
+userRoutes.put('/shipping-address/:addressnickname',
   isLoggedIn,
   createShippingAddress
 );
 userRoutes.delete(
-  '/:username/shipping-address/:addressnickname',
+  '/shipping-address/:addressnickname',
   isLoggedIn,
   createShippingAddress
 );
