@@ -3,13 +3,14 @@ dotenv.config();
 
 import express from 'express';
 import dbConnect from '../config/dbConnect.js';
-import userRoutes from '../routes/userRoutes.js';
+import { userRoutes, shippingAddressRoutes } from '../routes/userRoutes.js';
 import productRoutes from '../routes/productRoutes.js';
 import categoryRoutes from '../routes/categoryRoutes.js';
 import brandRoutes from '../routes/brandRoutes.js';
 import colorRoutes from '../routes/colorRoutes.js';
 import reviewRoutes from '../routes/reviewRoutes.js';
 import orderRoutes from '../routes/orderRoutes.js';
+import { isLoggedIn } from '../middlewares/isLoggedIn.js';
 
 // connect database
 dbConnect();
@@ -28,6 +29,7 @@ app.get('/', (req, res, next) => {
   });
 });
 app.use('/api/v1/users/', userRoutes);
+app.use('/api/v1/users/:username/', isLoggedIn, shippingAddressRoutes);
 app.use('/api/v1/products/', productRoutes);
 app.use('/api/v1/categories/', categoryRoutes);
 app.use('/api/v1/brands/', brandRoutes);

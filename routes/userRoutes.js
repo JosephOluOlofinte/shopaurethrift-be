@@ -7,9 +7,12 @@ import {
   registerUser,
 } from '../controllers/userController.js';
 import { isLoggedIn } from '../middlewares/isLoggedIn.js';
-import { createShippingAddress } from '../controllers/shippingAddress.js';
+import {
+  createShippingAddress,
+  getShippingAddress,
+} from '../controllers/shippingAddress.js';
 
-const userRoutes = express.Router();
+export const userRoutes = express.Router();
 
 userRoutes.post('/login', loginUser);
 userRoutes.post('/register', registerUser);
@@ -18,16 +21,22 @@ userRoutes.get('/:username', isLoggedIn, getOneUser);
 userRoutes.get('/profile', isLoggedIn, getUserProfile);
 
 // shipping address routes
-userRoutes.post('/shipping-address', isLoggedIn, createShippingAddress);
-userRoutes.get('shipping-address/:addressnickname', isLoggedIn, createShippingAddress);
-userRoutes.put('/shipping-address/:addressnickname',
+export const shippingAddressRoutes = express.Router();
+
+shippingAddressRoutes.post(
+  '/shipping-address',
   isLoggedIn,
   createShippingAddress
 );
-userRoutes.delete(
+shippingAddressRoutes.get('/shipping-address', isLoggedIn, getShippingAddress);
+shippingAddressRoutes.get('/:addressnickname', isLoggedIn, getShippingAddress);
+shippingAddressRoutes.put(
   '/shipping-address/:addressnickname',
   isLoggedIn,
   createShippingAddress
 );
-
-export default userRoutes;
+shippingAddressRoutes.delete(
+  '/shipping-address/:addressnickname',
+  isLoggedIn,
+  createShippingAddress
+);

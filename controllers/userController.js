@@ -38,7 +38,7 @@ export const getOneUser = async(req, res) => {
   if (!user) {
     return res.status(NOT_FOUND).json({
       status: 'error',
-      message: 'There are no existing users with the provided credentials'
+      message: 'There are no existing users with the provided credentials bget one user'
     })
   }
 

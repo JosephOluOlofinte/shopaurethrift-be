@@ -63,3 +63,33 @@ export const createShippingAddress = async (req, res) => {
 };
 
 
+// @desc get one shipping address
+// @route get /api/v1/users/:username/:addressnickname
+// @access private
+export const getShippingAddress = async (req, res) => {
+  // get and validate user
+  const user = req.userAuthId;
+  if (!user) {
+    return res.status(NOT_FOUND).json({
+      status: 'Error 404',
+      message: 'You must be logged in to see your shipping address'
+    });
+  }
+
+  // find shipping address by nickname
+  const { addressNickname } = req.body;
+  const existingAddress = await ShippingAddress.findOne({addressNickname});
+  if (!existingAddress) {
+    return res.status(NOT_FOUND).json({
+      status: '404 error',
+      message: 'The address you entered does not exist',
+    });
+  }
+
+  // return the response
+  return res.status(OK).json({
+    status: '200 success',
+    message: 'Adress found successfully',
+    existingAddress,
+  });
+}
