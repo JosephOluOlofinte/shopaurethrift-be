@@ -13,7 +13,6 @@ dotenv.config();
 // @desc create orders
 // @route Post /api/v1/orders
 // @access private
-
 export const createOrder = async (req, res) => {
   // get the payload (customer, orderItems, shippingAddress, totalPrice)
   const { orderItems, shippingAddress, totalPrice } = req.body;

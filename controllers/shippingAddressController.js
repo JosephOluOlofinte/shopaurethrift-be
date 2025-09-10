@@ -1,16 +1,13 @@
-
-
 import { NOT_FOUND, OK } from '../app/constants/httpStatusCodes.js';
 import ShippingAddress from '../models/ShippingAddress.js';
 import User from '../models/User.js';
 
 // @desc create shipping address
-// @route Post /api/v1/users/shipping-address
+// @route Post /api/v1/shipping-addresses
 // @access private
 export const createShippingAddress = async (req, res) => {
   // get the user
   const user = await User.findById(req.userAuthId);
-  const username = user.username;
 
   if (!user) {
     return req.status(NOT_FOUND).json({
@@ -18,7 +15,6 @@ export const createShippingAddress = async (req, res) => {
       message: 'You must be logged in to create a shipping address!',
     });
   }
-  
 
   // get the payload
   const {
@@ -35,7 +31,7 @@ export const createShippingAddress = async (req, res) => {
 
   // create and save shipping address to db
   const shippingAddress = await ShippingAddress.create({
-    user: username,
+    user: user._id,
     addressNickname,
     slug: addressNickname.toLowerCase(),
     firstName,
@@ -49,7 +45,7 @@ export const createShippingAddress = async (req, res) => {
   });
 
   // push address into user and update hasShippingAddress
-  user.shippingAddress.push(shippingAddress._id);
+  user.shippingAddresses.push(shippingAddress._id);
   user.hasShippingAddress = true;
   await user.save();
 
@@ -62,23 +58,29 @@ export const createShippingAddress = async (req, res) => {
   });
 };
 
+// @desc get all shipping addresses
+// @route get /api/v1/shipping-addresses
+// @access private
 
 // @desc get one shipping address
-// @route get /api/v1/users/:username/:addressnickname
+// @route get /api/v1/shipping-addresses/:addressnickname
 // @access private
 export const getShippingAddress = async (req, res) => {
   // get and validate user
-  const user = req.userAuthId;
+  const user = await User.findById(req.userAuthId).populate('shippingAddresses');
   if (!user) {
     return res.status(NOT_FOUND).json({
       status: 'Error 404',
-      message: 'You must be logged in to see your shipping address'
+      message: 'You must be logged in to see your shipping address',
     });
   }
 
   // find shipping address by nickname
-  const { addressNickname } = req.body;
-  const existingAddress = await ShippingAddress.findOne({addressNickname});
+  const { addressnickname } = req.params;
+  const existingAddress = user.shippingAddresses.find((address) => {
+    return address.addressNickname.toLowerCase() === addressnickname.toLowerCase();
+  });
+
   if (!existingAddress) {
     return res.status(NOT_FOUND).json({
       status: '404 error',
@@ -89,7 +91,15 @@ export const getShippingAddress = async (req, res) => {
   // return the response
   return res.status(OK).json({
     status: '200 success',
-    message: 'Adress found successfully',
+    message: 'Address found successfully',
     existingAddress,
   });
-}
+};
+
+// @desc update one shipping address
+// @route put /api/v1/shipping-addresses/:addressnickname
+// @access private
+
+// @desc delete one shipping address
+// @route delete /api/v1/shipping-addresses/:addressnickname
+// @access private

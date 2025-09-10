@@ -27,7 +27,7 @@ export const getAllUsers = async (req, res) => {
 }
 
 // @desc get one user
-// @route GET /api/v1/users/username
+// @route GET /api/v1/users/:username
 // @access Private/admin
 export const getOneUser = async(req, res) => {
   const { username } = req.params;
@@ -38,7 +38,7 @@ export const getOneUser = async(req, res) => {
   if (!user) {
     return res.status(NOT_FOUND).json({
       status: 'error',
-      message: 'There are no existing users with the provided credentials bget one user'
+      message: 'There are no existing users with the provided credentials. getOneUser'
     })
   }
 

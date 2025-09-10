@@ -52,7 +52,7 @@ const UserSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    shippingAddress: [
+    shippingAddresses: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'ShippingAddress',
