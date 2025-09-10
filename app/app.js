@@ -59,6 +59,7 @@ app.post(
           currency,
           paymentMethod,
           paymentStatus,
+          // status: 'processing'
         },
         {
           new: true,

@@ -17,7 +17,7 @@ export const createOrder = async (req, res) => {
   // get the payload (customer, orderItems, shippingAddress, totalPrice)
   const { orderItems, shippingAddress, totalPrice } = req.body;
 
-  // find amd validate the user
+  // find and validate the user
   const user = await User.findById(req.userAuthId);
   if (!user) {
     return req.status(NOT_FOUND).json({
@@ -48,7 +48,7 @@ export const createOrder = async (req, res) => {
   const randomResult = randomTxt + randomNumbers;
 
   // generate order slug
-  const orderSlug = `${user.slug}/orders/${randomResult}`.toLowerCase();
+  const orderSlug = `${user.slug}-${randomResult}`.toLowerCase();
 
   // create and save the order to db
   const order = await Order.create({
@@ -107,4 +107,73 @@ export const createOrder = async (req, res) => {
   // push order into user
   user.orders.push(order._id);
   await user.save();
+};
+
+// @desc get all orders
+// @route Post /api/v1/orders
+// @access private/Admin
+export const getAllOrders = async (req, res) => {
+  // fetch all orders
+  const orders = await Order.find();
+
+  return res.status(OK).json({
+    status: '200 OK',
+    message: 'Orders fetched successfully',
+    orders,
+  });
+};
+
+// @desc get one order
+// @route Post /api/v1/orders/:slug
+// @access private/Admin
+export const getOneOrder = async (req, res) => {
+  // destructure the slug
+  const { slug: slug } = req.params;
+
+  const order = await Order.findOne({ slug: slug });
+
+  if (!order) {
+    res.status(NOT_FOUND).json({
+      status: '404 ERROR',
+      message: 'The requested order does not exist',
+    });
+  }
+
+  return res.status(OK).json({
+    status: '200 OK',
+    message: 'Order fetched successfully',
+    order,
+  });
+};
+
+// @desc update one order
+// @route Post /api/v1/orders/update/:slug
+// @access private/Admin
+export const updateOrder = async (req, res) => {
+  // destructure the slug
+  const { slug: slug } = req.params;
+
+  const order = await Order.findOneAndUpdate(
+    { slug: slug },
+    {
+      orderStatus: req.body.status,
+    },
+
+    {
+      new: true,
+    }
+  );
+
+  if (!order) {
+    res.status(NOT_FOUND).json({
+      status: '404 ERROR',
+      message: 'The requested order does not exist',
+    });
+  }
+
+  return res.status(OK).json({
+    status: '200 OK',
+    message: 'Order updated successfully',
+    order,
+  });
 };
