@@ -153,27 +153,33 @@ export const updateOrder = async (req, res) => {
   // destructure the slug
   const { slug: slug } = req.params;
 
-  const order = await Order.findOneAndUpdate(
-    { slug: slug },
-    {
-      orderStatus: req.body.status,
-    },
+  // destructure incoming data
+  const { orderStatus } = req.body;
 
+  // check if order exists
+
+  const existingOrder = await Order.findOne({ slug: slug });
+  if (!existingOrder) {
+    return res.status(NOT_FOUND).json({
+      status: '404 error',
+      message: 'The provided order does not exist',
+    });
+  }
+
+  // update the order
+  const updatedOrder = await Order.findByIdAndUpdate(
+    existingOrder._id,
+    {
+      orderStatus: orderStatus,
+    },
     {
       new: true,
     }
   );
 
-  if (!order) {
-    res.status(NOT_FOUND).json({
-      status: '404 ERROR',
-      message: 'The requested order does not exist',
-    });
-  }
-
   return res.status(OK).json({
     status: '200 OK',
     message: 'Order updated successfully',
-    order,
+    updatedOrder,
   });
 };

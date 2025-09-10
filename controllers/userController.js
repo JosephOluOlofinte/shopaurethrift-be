@@ -4,6 +4,7 @@ import generateToken from '../utils/generateToken.js';
 import { getTokenFromHeader } from '../utils/getTokenFromHeader.js';
 import { verifyToken } from '../utils/verifyToken.js';
 import { BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from '../app/constants/httpStatusCodes.js';
+import getAndValidateUser from '../utils/getAndValidateUser.js';
 
 
 // @desc get all users
@@ -145,15 +146,13 @@ export const loginUser = async (req, res) => {
 // @route POST /api/v1/users/profile
 // @access Private
 export const getUserProfile = async (req, res) => {
-  // get token from header
-  const token = getTokenFromHeader(req);
-
-  // verify token
-  const verified = verifyToken(token);
+  // find the user
+  const user = await getAndValidateUser(req.userAuthId, 'orders', 'The provided user does not exist')
 
   return res.json({
     status: 'success',
-    message: 'Welcome to your profile!',
+    message: 'User profile fetched succesffully',
+    user
   });
 };
 
