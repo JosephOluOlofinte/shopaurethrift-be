@@ -1,3 +1,5 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import {
   BAD_REQUEST,
   NOT_FOUND,
@@ -7,8 +9,6 @@ import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import User from '../models/User.js';
 import Stripe from 'stripe';
-import dotenv from 'dotenv';
-dotenv.config();
 
 // @desc create orders
 // @route Post /api/v1/orders
@@ -72,23 +72,23 @@ export const createOrder = async (req, res) => {
         },
         unit_amount: item.price * 100,
       },
-      quantity: item.quantity,
+      quantity: item.qty,
     };
   });
 
-
-  //  pass converted payload to Stripe
+  //stripe instance
   const stripe = new Stripe(process.env.STRIPE_KEY);
   const session = await stripe.checkout.sessions.create({
     line_items: convertedOrders,
+    metadata: {
+      orderId: JSON.stringify(order._id),
+    },
     mode: 'payment',
-    success_url: 'https://localhost:3000/payment/success',
-    cancel_url: 'https://localhost:3000/payment/cancel',
+    success_url: 'https://localhost:4040/',
+    cancel_url: 'https://localhost:4040/',
   });
 
   res.send({ url: session.url });
-
-  // implement payment webhook
 
   // Update product quantity sold and quantity left
   const products = await Product.find({ _id: { $in: orderItems } });
@@ -98,7 +98,7 @@ export const createOrder = async (req, res) => {
     });
 
     if (product) {
-      product.totalSold += order.totalQtyBuying;
+      product.totalSold += order.qty;
     }
 
     await product.save();
@@ -107,12 +107,4 @@ export const createOrder = async (req, res) => {
   // push order into user
   user.orders.push(order._id);
   await user.save();
-
-  // update user order details
-
-  return res.status(OK).json({
-    status: 'success',
-    message: 'Order created successfully',
-    order,
-  });
 };
