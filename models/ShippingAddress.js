@@ -8,9 +8,6 @@ const ShippingAddressSchema = new Schema(
       type: String,
       required: [true, 'Enter a name to save this address.'],
     },
-    slug: {
-      type: String,
-    },
     firstName: {
       type: String,
       required: [true, 'First name is required'],

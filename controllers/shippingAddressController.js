@@ -1,4 +1,9 @@
-import { NOT_FOUND, OK } from '../app/constants/httpStatusCodes.js';
+import {
+  CONFLICT,
+  INTERNAL_SERVER_ERROR,
+  NOT_FOUND,
+  OK,
+} from '../app/constants/httpStatusCodes.js';
 import User from '../models/User.js';
 import ShippingAddress from '../models/ShippingAddress.js';
 import getAndValidateUser from '../utils/getAndValidateUser.js';
@@ -8,16 +13,14 @@ import getAndValidateUser from '../utils/getAndValidateUser.js';
 // @access private
 export const createShippingAddress = async (req, res) => {
   // get the user
-  const user = await User.findById(req.userAuthId);
+  const user = await getAndValidateUser(
+    req.userAuthId,
+    'shippingAddresses',
+    'You must be logged in to create a shipping address!'
+  );
+    
 
-  if (!user) {
-    return req.status(NOT_FOUND).json({
-      status: 'Error 404. Not Found',
-      message: 'You must be logged in to create a shipping address!',
-    });
-  }
-
-  // get the payload
+  // destructure the payload
   const {
     addressNickname,
     firstName,
@@ -30,11 +33,22 @@ export const createShippingAddress = async (req, res) => {
     phone,
   } = req.body;
 
+  // check if there is an existing address with the nickname
+  const existingAddress = user.shippingAddresses.find((address) => {
+    return address.addressNickname.toLowerCase() === addressNickname.toLowerCase();
+  })
+
+  if (existingAddress) {
+    return res.status(CONFLICT).json({
+      status: '409 CONFLICT',
+      message: 'You already have an existing address with the provided nickname.',
+    });
+  }
+
   // create and save shipping address to db
   const shippingAddress = await ShippingAddress.create({
     user: user._id,
     addressNickname,
-    slug: addressNickname.toLowerCase(),
     firstName,
     lastName,
     address,
@@ -67,7 +81,7 @@ export const getAllShippingAddresses = async (req, res) => {
   const user = await getAndValidateUser(
     req.userAuthId,
     'shippingAddresses',
-    'You must be logged in to see your'
+    'You must be logged in to see your addresses'
   );
 
   // fetch addresses from user
@@ -75,23 +89,26 @@ export const getAllShippingAddresses = async (req, res) => {
   if (addresses <= 0) {
     return res.status(NOT_FOUND).json({
       status: 'error 404',
-      message: 'You have not added a shipping address yet. Add to save results. '
-    })
+      message:
+        'You have not added a shipping address yet. Add one to see results. ',
+    });
   }
 
   return res.status(OK).json({
     status: 'OK 200',
     message: 'Addresses fetched successfully',
-    addresses
-  })
-}
+    addresses,
+  });
+};
 
 // @desc get one shipping address
 // @route get /api/v1/shipping-addresses/:addressnickname
 // @access private
 export const getShippingAddress = async (req, res) => {
   // get and validate user
-  const user = await User.findById(req.userAuthId).populate('shippingAddresses');
+  const user = await User.findById(req.userAuthId).populate(
+    'shippingAddresses'
+  );
   if (!user) {
     return res.status(NOT_FOUND).json({
       status: 'Error 404',
@@ -102,7 +119,9 @@ export const getShippingAddress = async (req, res) => {
   // find shipping address by nickname
   const { addressnickname } = req.params;
   const existingAddress = user.shippingAddresses.find((address) => {
-    return address.addressNickname.toLowerCase() === addressnickname.toLowerCase();
+    return (
+      address.addressNickname.toLowerCase() === addressnickname.toLowerCase()
+    );
   });
 
   if (!existingAddress) {
@@ -120,10 +139,122 @@ export const getShippingAddress = async (req, res) => {
   });
 };
 
-// @desc update one shipping address
+// @desc update shipping address
 // @route put /api/v1/shipping-addresses/:addressnickname
 // @access private
+export const updateShippingAddress = async (req, res) => {
+  // get and validate user
+  const user = await getAndValidateUser(
+    req.userAuthId,
+    'shippingAddresses',
+    'You must be logged in to edit or update your addresses'
+  );
+
+  // get address from user data
+  const { addressnickname } = req.params;
+  const existingAddress = user.shippingAddresses.find((address) => {
+    return (
+      address.addressNickname.toLowerCase() === addressnickname.toLowerCase()
+    );
+  });
+
+  if (!existingAddress) {
+    return res.status(NOT_FOUND).json({
+      status: '404 error',
+      message: 'The provided address does not exist',
+    });
+  }
+
+  // destructure incoming data
+  const {
+    addressNickname,
+    firstName,
+    lastName,
+    address,
+    city,
+    postalCode,
+    province,
+    country,
+    phone,
+  } = req.body;
+
+  // find address by id in the DB and update the fields
+  try {
+    const editedAddress = await ShippingAddress.findByIdAndUpdate(
+      existingAddress._id,
+      {
+        addressNickname,
+        firstName,
+        lastName,
+        address,
+        city,
+        postalCode,
+        province,
+        country,
+        phone,
+      },
+      {
+        new: true,
+      }
+    );
+
+    // send the response
+    return res.status(OK).json({
+      status: '200 OK',
+      message: 'Address successfully updated!',
+      editedAddress,
+    });
+  } catch (error) {
+    if (err) {
+      return res.status(INTERNAL_SERVER_ERROR).json({
+        status: '500 INTERNAL SERVER ERROR',
+        message: 'Something went wrong. Please check your network and retry.',
+      });
+    }
+  }
+};
 
 // @desc delete one shipping address
 // @route delete /api/v1/shipping-addresses/:addressnickname
 // @access private
+export const deleteShippingAddress = async (req, res) => {
+  // get and validate the user
+  const user = await getAndValidateUser(
+    req.userAuthId,
+    'shippingAddresses',
+    'You must be signed in to delete your shipping address.'
+  );
+
+  // get address from user data
+  const { addressnickname } = req.params;
+  const existingAddress = user.shippingAddresses.find((address) => {
+    return (
+      address.addressNickname.toLowerCase() === addressnickname.toLowerCase()
+    );
+  });
+
+  if (!existingAddress) {
+    return res.status(NOT_FOUND).json({
+      status: '404 ERROR',
+      message: 'The provided address does not exist.',
+    });
+  }
+
+  // find and delete address from db
+  try {
+    const deletedAddress = await ShippingAddress.findByIdAndDelete(
+      existingAddress._id
+    );
+
+    return res.status(OK).json({
+      status: '200 OK',
+      message: 'Address deleted successfully.',
+      deletedAddress
+    });
+  } catch (error) {
+    return res.status(INTERNAL_SERVER_ERROR).json({
+      status: '500 INTERNAL SERVER ERROR',
+      message: 'Something went wrong. Please check your network and retry.',
+    });
+  }
+};
