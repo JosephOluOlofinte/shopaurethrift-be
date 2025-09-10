@@ -1,6 +1,7 @@
 import { NOT_FOUND, OK } from '../app/constants/httpStatusCodes.js';
-import ShippingAddress from '../models/ShippingAddress.js';
 import User from '../models/User.js';
+import ShippingAddress from '../models/ShippingAddress.js';
+import getAndValidateUser from '../utils/getAndValidateUser.js';
 
 // @desc create shipping address
 // @route Post /api/v1/shipping-addresses
@@ -61,6 +62,29 @@ export const createShippingAddress = async (req, res) => {
 // @desc get all shipping addresses
 // @route get /api/v1/shipping-addresses
 // @access private
+export const getAllShippingAddresses = async (req, res) => {
+  // get and validate user
+  const user = await getAndValidateUser(
+    req.userAuthId,
+    'shippingAddresses',
+    'You must be logged in to see your'
+  );
+
+  // fetch addresses from user
+  const addresses = user.shippingAddresses;
+  if (addresses <= 0) {
+    return res.status(NOT_FOUND).json({
+      status: 'error 404',
+      message: 'You have not added a shipping address yet. Add to save results. '
+    })
+  }
+
+  return res.status(OK).json({
+    status: 'OK 200',
+    message: 'Addresses fetched successfully',
+    addresses
+  })
+}
 
 // @desc get one shipping address
 // @route get /api/v1/shipping-addresses/:addressnickname
