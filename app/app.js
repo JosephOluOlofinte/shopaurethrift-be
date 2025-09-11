@@ -45,27 +45,36 @@ app.post(
     if (event.type === 'checkout.session.completed') {
       // update the order
       const session = event.data.object;
-      const { orderId } = session.metadata;
+      const orderId = session.metadata.orderId;
       const paymentStatus = session.payment_status;
       const paymentMethod = session.payment_method_types[0];
       const totalAmount = session.amount_total;
       const currency = session.currency;
 
-      // find the order
-      const order = await Order.findByIdAndUpdate(
-        JSON.parse(orderId),
+      // find the order and update it
+      if (!orderId) {
+        console.error(
+          'No orderId found in session metadata:',
+          session.metadata
+        );
+        return res.status(400).send('Missing orderId');
+      }
+      // const parsedOrderId = JSON.parse(orderId);
+      const updatedOrder = await Order.findByIdAndUpdate(
+        orderId,
         {
           totalPrice: totalAmount / 100,
           currency,
           paymentMethod,
           paymentStatus,
-          // status: 'processing'
+          orderStatus: 'processing'
         },
         {
           new: true,
         }
       );
       
+      console.log('Updated order:', updatedOrder);
     } else {
       return;
     }
@@ -81,7 +90,7 @@ app.post(
     // }
 
     // return a 200 response to acknowledge receipt of the event
-    return res.status(200).end;
+    return res.status(200).end();
   }
 );
 

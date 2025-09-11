@@ -18,7 +18,9 @@ export const createOrder = async (req, res) => {
   const { orderItems, shippingAddress, totalPrice } = req.body;
 
   // find and validate the user
-  const user = await User.findById(req.userAuthId);
+  const user = await User.findById(req.userAuthId).populate(
+    'shippingAddresses'
+  );
   if (!user) {
     return req.status(NOT_FOUND).json({
       status: '404 - User not found',
@@ -31,6 +33,21 @@ export const createOrder = async (req, res) => {
     return res.status(NOT_FOUND).json({
       status: '404. Error',
       message: 'You must add a shipping address to place an order.',
+    });
+  }
+
+  // get selected address from user data
+  const addressExistsOnUser = user.shippingAddresses.find((eachAddress) => {
+    return (
+      eachAddress.addressNickname.toLowerCase() ===
+      shippingAddress.toLowerCase()
+    );
+  });
+
+  if (!addressExistsOnUser) {
+    return res.status(NOT_FOUND).json({
+      status: '404 ERROR',
+      message: 'The provided address does not exist in your account. Please check add it to your shipping addresses',
     });
   }
 
@@ -55,8 +72,8 @@ export const createOrder = async (req, res) => {
     user: user._id,
     orderItems,
     orderNumber: randomResult,
-    slug: orderSlug,
-    shippingAddress,
+    slug: `${user.username}/${randomResult}`,
+    shippingAddress: addressExistsOnUser,
     totalPrice,
   });
 
@@ -81,7 +98,7 @@ export const createOrder = async (req, res) => {
   const session = await stripe.checkout.sessions.create({
     line_items: convertedOrders,
     metadata: {
-      orderId: JSON.stringify(order._id),
+      orderId: order._id.toString(),
     },
     mode: 'payment',
     success_url: 'https://localhost:4040/',
@@ -124,7 +141,7 @@ export const getAllOrders = async (req, res) => {
 };
 
 // @desc get one order
-// @route Post /api/v1/orders/:slug
+// @route Post /api/v1/orders/:username/:orderNumber
 // @access private/Admin
 export const getOneOrder = async (req, res) => {
   // destructure the slug
