@@ -225,7 +225,6 @@ export const getSingleProduct = async (req, res) => {
 };
 
 
-
 // @desc    update single product
 // @route   PUT /api/v1/products/:slug
 // @access  Private /Admin
@@ -234,7 +233,6 @@ export const updateProduct = async (req, res) => {
 
   const {
     name,
-    slug,
     description,
     brand,
     category,

@@ -39,8 +39,8 @@ export const createOrder = async (req, res) => {
   // get selected address from user data
   const addressExistsOnUser = user.shippingAddresses.find((eachAddress) => {
     return (
-      eachAddress.addressNickname.toLowerCase() ===
-      shippingAddress.toLowerCase()
+      eachAddress.addressNickname.toLowerCase() === shippingAddress.toLowerCase()
+      // this is where I left. shippingAddress.toLowerCase not a function
     );
   });
 
@@ -108,18 +108,18 @@ export const createOrder = async (req, res) => {
   res.send({ url: session.url });
 
   // Update product quantity sold and quantity left
-  const products = await Product.find({ _id: { $in: orderItems } });
-  orderItems.map(async (order) => {
-    const product = products.find((product) => {
-      return product._id.toString() === order._id.toString();
-    });
+  // const products = await Product.find({ _id: { $in: orderItems } });
+  // orderItems.map(async (order) => {
+  //   const product = products.find((product) => {
+  //     return product._id.toString() === order._id.toString();
+  //   });
 
-    if (product) {
-      product.totalSold += order.qty;
-    }
+  //   if (product) {
+  //     product.totalSold += order.qty;
+  //   }
 
-    await product.save();
-  });
+  //   await product.save();
+  // });
 
   // push order into user
   user.orders.push(order._id);

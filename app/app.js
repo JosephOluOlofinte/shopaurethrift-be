@@ -12,6 +12,7 @@ import reviewRoutes from '../routes/reviewRoutes.js';
 import orderRoutes from '../routes/orderRoutes.js';
 import shippingAddressRoutes from '../routes/shippingAddressRoutes.js';
 import Order from '../models/Order.js';
+import Product from '../models/Product.js';
 
 // connect database
 dbConnect();
@@ -67,14 +68,29 @@ app.post(
           currency,
           paymentMethod,
           paymentStatus,
-          orderStatus: 'processing'
+          orderStatus: 'processing',
         },
         {
           new: true,
         }
       );
-      
+
       console.log('Updated order:', updatedOrder);
+
+      // Update product quantity sold and quantity left
+      const products = await Product.find({ _id: { $in: updatedOrder.orderItems } });
+      updatedOrder.orderItems.map(async (order) => {
+        const product = products.find((product) => {
+          return product._id.toString() === order._id.toString();
+        });
+
+        if (product) {
+          product.totalSold += order.qty;
+        }
+
+        await product.save();
+      });
+
     } else {
       return;
     }
