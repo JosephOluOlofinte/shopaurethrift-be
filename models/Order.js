@@ -10,18 +10,18 @@ const OrderSchema = new Schema(
       ref: 'User',
       required: true,
     },
-    orderItems: [
-      {
-        type: Object,
-        required: true,
-      },
-    ],
     orderNumber: {
       type: String,
     },
     slug: {
       type: String,
     },
+    orderItems: [
+      {
+        type: Object,
+        required: true,
+      },
+    ],
     shippingAddress: {
       type: Object,
       required: true,

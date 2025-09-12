@@ -6,7 +6,7 @@ import {
   OK,
 } from '../app/constants/httpStatusCodes.js';
 import Order from '../models/Order.js';
-import Product from '../models/Product.js';
+// import Product from '../models/Product.js';
 import User from '../models/User.js';
 import Stripe from 'stripe';
 import ShippingAddress from '../models/ShippingAddress.js';
@@ -172,28 +172,28 @@ export const getOneOrder = async (req, res) => {
 };
 
 // @desc update one order
-// @route Post /api/v1/orders/update/:slug
+// @route Post /api/v1/orders/:username/:orderNmuber
 // @access private/Admin
 export const updateOrder = async (req, res) => {
-  // destructure the slug
-  const { slug: slug } = req.params;
-
-  // destructure incoming data
+  // destructure the slug and incoming data
+  const { username, orderNumber } = req.params;
   const { orderStatus } = req.body;
 
-  // check if order exists
+  // construct slug
+  const slug = `${username}/${orderNumber}`
 
-  const existingOrder = await Order.findOne({ slug: slug });
+  // check if order exists
+  const existingOrder = await Order.findOne({ slug });
   if (!existingOrder) {
     return res.status(NOT_FOUND).json({
       status: '404 error',
-      message: 'The provided order does not exist',
+      message: 'The provided order does not exist or has been deleted',
     });
   }
 
   // update the order
-  const updatedOrder = await Order.findByIdAndUpdate(
-    existingOrder._id,
+  const updatedOrder = await Order.findOneAndUpdate(
+    { slug },
     {
       orderStatus: orderStatus,
     },
@@ -208,3 +208,31 @@ export const updateOrder = async (req, res) => {
     updatedOrder,
   });
 };
+
+
+// @desc delete one order
+// @route DELETE /api/v1/orders/:username/:orderNmuber
+// @access private/Admin
+export const deleteOrder = async (req, res) => {
+  // destructure the slug
+  const { username, orderNumber } = req.params;
+
+  // construct the slug
+  const slug = `${username}/${orderNumber}`;
+
+  // find the order and delete it from db
+  const deletedOrder = await Order.findOneAndDelete({ slug });
+
+  if (!deletedOrder) {
+    res.status(NOT_FOUND).json({
+      status: '400. NOT FOUND',
+      message: 'The provided order does not exist or has already been deleted'
+    })
+  }
+
+  res.status(OK).json({
+    status: '200. OK',
+    message: 'Order deleted successfully.',
+    deletedOrder
+  });
+}
