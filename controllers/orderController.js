@@ -9,6 +9,7 @@ import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import User from '../models/User.js';
 import Stripe from 'stripe';
+import ShippingAddress from '../models/ShippingAddress.js';
 
 // @desc create orders
 // @route Post /api/v1/orders
@@ -39,17 +40,20 @@ export const createOrder = async (req, res) => {
   // get selected address from user data
   const addressExistsOnUser = user.shippingAddresses.find((eachAddress) => {
     return (
-      eachAddress.addressNickname.toLowerCase() === shippingAddress.toLowerCase()
-      // this is where I left. shippingAddress.toLowerCase not a function
+      eachAddress.addressNickname.toLowerCase() ===
+      shippingAddress.toLowerCase()
     );
   });
 
   if (!addressExistsOnUser) {
     return res.status(NOT_FOUND).json({
       status: '404 ERROR',
-      message: 'The provided address does not exist in your account. Please check add it to your shipping addresses',
+      message:
+        'The provided address does not exist in your account. Please check add it to your shipping addresses',
     });
   }
+
+  const address = await ShippingAddress.findById(addressExistsOnUser._id);
 
   // check if order is not empty
   if (orderItems.length <= 0) {
@@ -73,7 +77,7 @@ export const createOrder = async (req, res) => {
     orderItems,
     orderNumber: randomResult,
     slug: `${user.username}/${randomResult}`,
-    shippingAddress: addressExistsOnUser,
+    shippingAddress: address,
     totalPrice,
   });
 
@@ -105,7 +109,11 @@ export const createOrder = async (req, res) => {
     cancel_url: 'https://localhost:4040/',
   });
 
-  res.send({ url: session.url });
+  // push order into user
+  user.orders.push(order._id);
+  await user.save();
+
+  res.status(OK).json({ status: '200 OK', url: session.url });
 
   // Update product quantity sold and quantity left
   // const products = await Product.find({ _id: { $in: orderItems } });
@@ -120,10 +128,6 @@ export const createOrder = async (req, res) => {
 
   //   await product.save();
   // });
-
-  // push order into user
-  user.orders.push(order._id);
-  await user.save();
 };
 
 // @desc get all orders
@@ -145,9 +149,13 @@ export const getAllOrders = async (req, res) => {
 // @access private/Admin
 export const getOneOrder = async (req, res) => {
   // destructure the slug
-  const { slug: slug } = req.params;
+  const { username, orderNumber } = req.params;
 
-  const order = await Order.findOne({ slug: slug });
+  // construct the order slug
+  const slug = `${username}/${orderNumber}`
+
+  // find the order
+  const order = await Order.findOne({ slug });
 
   if (!order) {
     res.status(NOT_FOUND).json({
