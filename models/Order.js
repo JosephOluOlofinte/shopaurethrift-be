@@ -12,14 +12,28 @@ const OrderSchema = new Schema(
     },
     orderNumber: {
       type: String,
+      unique: true,
     },
     slug: {
       type: String,
     },
     orderItems: [
       {
-        type: Object,
-        required: true,
+        _id: {
+          type: String,
+        },
+        name: {
+          type: String,
+        },
+        description: {
+          type: String,
+        },
+        orderQty: {
+          type: Number,
+        },
+        price: {
+          type: Number,
+        }
       },
     ],
     shippingAddress: {

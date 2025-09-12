@@ -69,19 +69,11 @@ const endpointSecret = process.env.STRIPE_SIGNING_SECRET;
         });
 
         // Update product quantity sold and quantity left
-        const products = await Product.find({
-          _id: { $in: updatedOrder.orderItems },
-        });
-        updatedOrder.orderItems.map(async (order) => {
-          const product = products.find((product) => {
-            return product._id.toString() === order._id.toString();
+        for (const item of updatedOrder.orderItems) {
+          await Product.findByIdAndUpdate(item._id, {
+            $inc: { totalQty: -item.orderQty },
           });
-
-          if (product) {
-            product.totalSold += order.qty;
-          }
-          await product.save();
-        });
+        }
         
       } catch (error) {
         

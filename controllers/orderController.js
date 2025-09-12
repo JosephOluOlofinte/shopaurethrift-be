@@ -10,6 +10,7 @@ import Order from '../models/Order.js';
 import User from '../models/User.js';
 import Stripe from 'stripe';
 import ShippingAddress from '../models/ShippingAddress.js';
+import generateUniqueOrderNumber from '../utils/generateUniqueOrderNumber.js';
 
 // @desc create orders
 // @route Post /api/v1/orders
@@ -63,71 +64,69 @@ export const createOrder = async (req, res) => {
     });
   }
 
-  // generate orderNumber
-  const randomTxt = Math.random().toString(36).substring(7).toLocaleUpperCase();
-  const randomNumbers = Math.floor(1000 + Math.random() * 90000);
-  const randomResult = randomTxt + randomNumbers;
+  
+  let orderNumber;
 
-  // generate order slug
-  const orderSlug = `${user.slug}-${randomResult}`.toLowerCase();
+  // create order, save to db, and initiate checkout
+  try {
+    // generate orderNumber
+    orderNumber = await generateUniqueOrderNumber();
 
-  // create and save the order to db
-  const order = await Order.create({
-    user: user._id,
-    orderItems,
-    orderNumber: randomResult,
-    slug: `${user.username}/${randomResult}`,
-    shippingAddress: address,
-    totalPrice,
-  });
+    const order = await Order.create({
+      user: user._id,
+      orderItems,
+      orderNumber,
+      slug: `${user.username}/${orderNumber}`,
+      shippingAddress: address,
+      totalPrice,
+    });
 
-  // debit user via Stripe
-  // convert orderItems to Stripe structure
-  const convertedOrders = orderItems.map((item) => {
-    return {
-      price_data: {
-        currency: 'usd',
-        product_data: {
-          name: item.name,
-          description: item.description,
+    // push order into user
+    user.orders.push(order._id);
+    await user.save();
+
+    // Stripe checkout logic
+    // convert orderItems to Stripe structure
+    const convertedOrders = orderItems.map((item) => {
+      return {
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: item.name,
+            description: item.description,
+          },
+          unit_amount: item.price * 100,
         },
-        unit_amount: item.price * 100,
+        quantity: item.orderQty,
+      };
+    });
+
+    //creat an instance of stripe and start the checkout session
+    const stripe = new Stripe(process.env.STRIPE_KEY);
+    const session = await stripe.checkout.sessions.create({
+      line_items: convertedOrders,
+      metadata: {
+        orderId: order._id.toString(),
       },
-      quantity: item.qty,
-    };
-  });
+      mode: 'payment',
+      success_url: 'https://localhost:4040/',
+      cancel_url: 'https://localhost:4040/',
+    });
 
-  //stripe instance
-  const stripe = new Stripe(process.env.STRIPE_KEY);
-  const session = await stripe.checkout.sessions.create({
-    line_items: convertedOrders,
-    metadata: {
-      orderId: order._id.toString(),
-    },
-    mode: 'payment',
-    success_url: 'https://localhost:4040/',
-    cancel_url: 'https://localhost:4040/',
-  });
+    res.status(OK).json({ status: '200 OK', url: session.url });
+  } catch (err) {
+    if (err.code === 11000) {
+      // duplicate key error from Mongo
+      console.warn('Order number collision detected at DB level, retrying...');
+      // regenerate and retry once more
+      orderNumber = await generateUniqueOrderNumber();
+      // save again
+    } else {
+      throw err;
+    }
+  }
 
-  // push order into user
-  user.orders.push(order._id);
-  await user.save();
-
-  res.status(OK).json({ status: '200 OK', url: session.url });
-
-  // Update product quantity sold and quantity left
-  // const products = await Product.find({ _id: { $in: orderItems } });
-  // orderItems.map(async (order) => {
-  //   const product = products.find((product) => {
-  //     return product._id.toString() === order._id.toString();
-  //   });
-
-  //   if (product) {
-  //     product.totalSold += order.qty;
-  //   }
-
-  //   await product.save();
-  // });
+  
 };
 
 // @desc get all orders
@@ -136,6 +135,14 @@ export const createOrder = async (req, res) => {
 export const getAllOrders = async (req, res) => {
   // fetch all orders
   const orders = await Order.find();
+
+  if (orders <= 0 ) {
+    return res.status(NOT_FOUND).json({
+      status: '404 NOT FOUND',
+      message: 'There are no orders yet',
+      orders,
+    });
+  }
 
   return res.status(OK).json({
     status: '200 OK',
@@ -152,7 +159,7 @@ export const getOneOrder = async (req, res) => {
   const { username, orderNumber } = req.params;
 
   // construct the order slug
-  const slug = `${username}/${orderNumber}`
+  const slug = `${username}/${orderNumber}`;
 
   // find the order
   const order = await Order.findOne({ slug });
@@ -180,7 +187,7 @@ export const updateOrder = async (req, res) => {
   const { orderStatus } = req.body;
 
   // construct slug
-  const slug = `${username}/${orderNumber}`
+  const slug = `${username}/${orderNumber}`;
 
   // check if order exists
   const existingOrder = await Order.findOne({ slug });
@@ -209,7 +216,6 @@ export const updateOrder = async (req, res) => {
   });
 };
 
-
 // @desc delete one order
 // @route DELETE /api/v1/orders/:username/:orderNmuber
 // @access private/Admin
@@ -226,13 +232,13 @@ export const deleteOrder = async (req, res) => {
   if (!deletedOrder) {
     res.status(NOT_FOUND).json({
       status: '400. NOT FOUND',
-      message: 'The provided order does not exist or has already been deleted'
-    })
+      message: 'The provided order does not exist or has already been deleted',
+    });
   }
 
   res.status(OK).json({
     status: '200. OK',
     message: 'Order deleted successfully.',
-    deletedOrder
+    deletedOrder,
   });
-}
+};
