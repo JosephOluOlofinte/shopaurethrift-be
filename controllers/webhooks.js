@@ -68,10 +68,9 @@ const endpointSecret = process.env.STRIPE_SIGNING_SECRET;
           updatedOrder,
         });
 
-        // Update product quantity sold and quantity left
         for (const item of updatedOrder.orderItems) {
           await Product.findByIdAndUpdate(item._id, {
-            $inc: { totalQty: -item.orderQty },
+            $inc: { totalSold: +item.orderQty },
           });
         }
         
