@@ -17,33 +17,48 @@ import Coupon from '../models/Coupon.js';
 // @route Post /api/v1/orders
 // @access private
 export const createOrder = async (req, res) => {
+  const messages = [];
+
   // get the coupon from url query
   const { coupon } = req.query;
+  let existingCoupon;
 
-  const existingCoupon = await Coupon.findOne({
-    code: coupon?.toUpperCase(),
-  });
+  if (coupon) {
+    existingCoupon = await Coupon.findOne({
+      code: coupon?.toUpperCase(),
+    });
 
-  if (existingCoupon?.isExpired) {
-    return {
-      coupon: coupon,
-      message: 'The coupon code you entered has expired',
-    };
+    if (existingCoupon?.isExpired) {
+      messages.push({
+        coupon: coupon,
+        message: 'The coupon code you entered has expired',
+      });
+    }
+
+    if (!existingCoupon) {
+      messages.push({
+        coupon: coupon,
+        message: 'The coupon you entered does not exist',
+      });
+    }
   }
 
-  if (!existingCoupon) {
-    return {
-      coupon: coupon,
-      message: 'The coupon you entered does not exist',
-    };
-  }
+  
 
   // get discount
-  const discount = existingCoupon.discount / 100;
-  return {
-    coupon: coupon,
-    message: `${discount} discount added successfully`
+  const discount = coupon ? existingCoupon.discount / 100 : 0;
+  if (discount > 0) {
+    messages.push({
+      coupon: coupon,
+      discount: `${existingCoupon.discount}% discount added successfully`,
+    });
+  } else {
+    messages.push({
+      coupon: 'Not provided',
+      discount: 'No discount has been added to your order',
+    });
   }
+  
 
 
   // get the payload (customer, orderItems, shippingAddress, totalPrice)
@@ -107,6 +122,8 @@ export const createOrder = async (req, res) => {
       orderNumber,
       slug: `${user.username}/${orderNumber}`,
       shippingAddress: address,
+      coupon,
+      discount: `${coupon ? `${existingCoupon.discount}%` : 'Not applicable'}`,
       totalPrice: existingCoupon ? totalPrice - totalPrice * discount : totalPrice,
     });
 
@@ -144,7 +161,7 @@ export const createOrder = async (req, res) => {
       cancel_url: 'https://localhost:4040/',
     });
 
-    res.status(OK).json({ status: '200 OK', url: session.url });
+    res.status(OK).json({ status: '200 OK', messages, order, url: session.url });
   } catch (err) {
     if (err.code === 11000) {
       // duplicate key error from Mongo
@@ -246,7 +263,7 @@ export const updateOrder = async (req, res) => {
 };
 
 // @desc delete one order
-// @route DELETE /api/v1/orders/:username/:orderNmuber
+// @route DELETE /api/v1/orders/:username/:orderNumber
 // @access private/Admin
 export const deleteOrder = async (req, res) => {
   // destructure the slug
@@ -269,5 +286,28 @@ export const deleteOrder = async (req, res) => {
     status: '200. OK',
     message: 'Order deleted successfully.',
     deletedOrder,
+  });
+};
+
+
+// @desc delete all orders
+// @route DELETE /api/v1/orders/
+// @access private/Admin
+export const deleteAllOrders = async (req, res) => {
+
+  // find the order and delete it from db
+  const deletedOrders = await Order.findOneAndDelete();
+
+  if (!deletedOrders) {
+    res.status(NOT_FOUND).json({
+      status: '400. NOT FOUND',
+      message: 'There are no existing orders or have already been deleted',
+    });
+  }
+
+  res.status(OK).json({
+    status: '200. OK',
+    message: 'Orders deleted successfully.',
+    deletedOrders,
   });
 };

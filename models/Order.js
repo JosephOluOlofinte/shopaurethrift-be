@@ -57,8 +57,8 @@ const OrderSchema = new Schema(
       default: 'Not provided'
     },
     discount: {
-      type: Number,
-      default: '0.0'
+      type: String,
+      default: 'No discount'
     },
     totalPrice: {
       type: Number,
