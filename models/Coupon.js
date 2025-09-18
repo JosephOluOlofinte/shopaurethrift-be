@@ -7,6 +7,7 @@ const CouponSchema = new Schema(
     code: {
       type: String,
       required: true,
+      unique: true,
     },
     startDate: {
       type: Date,

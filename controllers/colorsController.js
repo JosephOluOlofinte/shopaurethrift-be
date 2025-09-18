@@ -9,7 +9,7 @@ import Color from '../models/Color.js';
 import convertNameToSlug from '../utils/convertNameToSlug.js';
 
 // @desc    create new color
-// @route   POST /api/v1/colors/create-new
+// @route   POST /api/v1/colors
 // @access  Private/Admin
 export const createColor = async (req, res) => {
   const { name } = req.body;

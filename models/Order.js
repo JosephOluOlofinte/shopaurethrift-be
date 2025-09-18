@@ -52,6 +52,14 @@ const OrderSchema = new Schema(
       type: String,
       default: 'Not specified',
     },
+    coupon: {
+      type: String,
+      default: 'Not provided'
+    },
+    discount: {
+      type: Number,
+      default: '0.0'
+    },
     totalPrice: {
       type: Number,
       default: '0.0',

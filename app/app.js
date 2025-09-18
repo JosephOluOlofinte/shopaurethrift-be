@@ -11,6 +11,7 @@ import reviewRoutes from '../routes/reviewRoutes.js';
 import orderRoutes from '../routes/orderRoutes.js';
 import shippingAddressRoutes from '../routes/shippingAddressRoutes.js';
 import webhookRoutes from '../routes/webhookRoutes.js';
+import couponRoutes from '../routes/couponRoutes.js';
 
 // connect database
 dbConnect();
@@ -43,5 +44,6 @@ app.use('/api/v1/colors/', colorRoutes);
 app.use('/api/v1/reviews/', reviewRoutes);
 app.use('/api/v1/orders/', orderRoutes);
 app.use('/api/v1/shipping-addresses/', shippingAddressRoutes);
+app.use('/api/v1/coupons/', couponRoutes);
 
 export default app;

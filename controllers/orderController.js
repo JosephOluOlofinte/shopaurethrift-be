@@ -11,11 +11,41 @@ import User from '../models/User.js';
 import Stripe from 'stripe';
 import ShippingAddress from '../models/ShippingAddress.js';
 import generateUniqueOrderNumber from '../utils/generateUniqueOrderNumber.js';
+import Coupon from '../models/Coupon.js';
 
 // @desc create orders
 // @route Post /api/v1/orders
 // @access private
 export const createOrder = async (req, res) => {
+  // get the coupon from url query
+  const { coupon } = req.query;
+
+  const existingCoupon = await Coupon.findOne({
+    code: coupon?.toUpperCase(),
+  });
+
+  if (existingCoupon?.isExpired) {
+    return {
+      coupon: coupon,
+      message: 'The coupon code you entered has expired',
+    };
+  }
+
+  if (!existingCoupon) {
+    return {
+      coupon: coupon,
+      message: 'The coupon you entered does not exist',
+    };
+  }
+
+  // get discount
+  const discount = existingCoupon.discount / 100;
+  return {
+    coupon: coupon,
+    message: `${discount} discount added successfully`
+  }
+
+
   // get the payload (customer, orderItems, shippingAddress, totalPrice)
   const { orderItems, shippingAddress, totalPrice } = req.body;
 
@@ -24,7 +54,7 @@ export const createOrder = async (req, res) => {
     'shippingAddresses'
   );
   if (!user) {
-    return req.status(NOT_FOUND).json({
+    return res.status(NOT_FOUND).json({
       status: '404 - User not found',
       message: 'You must be logged in to place an order.',
     });
@@ -64,7 +94,6 @@ export const createOrder = async (req, res) => {
     });
   }
 
-  
   let orderNumber;
 
   // create order, save to db, and initiate checkout
@@ -78,8 +107,10 @@ export const createOrder = async (req, res) => {
       orderNumber,
       slug: `${user.username}/${orderNumber}`,
       shippingAddress: address,
-      totalPrice,
+      totalPrice: existingCoupon ? totalPrice - totalPrice * discount : totalPrice,
     });
+
+    console.log(order)
 
     // push order into user
     user.orders.push(order._id);
@@ -125,8 +156,6 @@ export const createOrder = async (req, res) => {
       throw err;
     }
   }
-
-  
 };
 
 // @desc get all orders
