@@ -72,7 +72,7 @@ export const getAllBrands = async (req, res) => {
 export const getSingleBrand = async (req, res) => {
   const { slug } = req.params;
 
-  const brand = await Brand.findOne({ slug }).populate({
+  const brand = await Brand.findOne({ slug: slug }).populate({
     path: 'products',
     select: 'name slug',
   });
@@ -138,7 +138,7 @@ export const deleteBrand = async (req, res) => {
   const { slug } = req.params;
 
   // throw error if brand does not exist
-  const brand = await Brand.findOne({ slug });
+  const brand = await Brand.findOne({ slug: slug });
 
   if (!brand) {
     return res.status(NOT_FOUND).json({

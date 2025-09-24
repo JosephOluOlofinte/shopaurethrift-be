@@ -15,7 +15,7 @@ export const createCategory = async (req, res) => {
   const { name, image } = req.body;
 
   // check if categorye exists
-  const existingCategory = await Category.findOne({ name });
+  const existingCategory = await Category.findOne({ name: name });
 
   if (existingCategory) {
     return res.status(CONFLICT).json({
@@ -75,7 +75,7 @@ export const getAllCategories = async (req, res) => {
 export const getSingleCategory = async (req, res) => {
   const { slug } = req.params;
 
-  const category = await Category.findOne({ slug }).populate({
+  const category = await Category.findOne({ slug: slug }).populate({
     path: 'products',
     select: 'name slug',
   });
@@ -137,7 +137,7 @@ export const deleteCategory = async (req, res) => {
   const { slug } = req.params;
 
   // throw error if category does not exist
-  const category = await Category.findOne({ slug });
+  const category = await Category.findOne({ slug: slug });
 
   if (!category) {
     return res.status(NOT_FOUND).json({

@@ -304,7 +304,7 @@ export const deleteOrder = async (req, res) => {
 export const deleteAllOrders = async (req, res) => {
 
   // find the order and delete it from db
-  const deletedOrders = await Order.findOneAndDelete();
+  const deletedOrders = await Order.deleteMany({});
 
   if (!deletedOrders) {
     res.status(NOT_FOUND).json({

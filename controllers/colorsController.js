@@ -15,7 +15,7 @@ export const createColor = async (req, res) => {
   const { name } = req.body;
 
   // check if color exists
-  const existingColor = await Color.findOne({ name });
+  const existingColor = await Color.findOne({ name: name });
 
   if (existingColor) {
     return res.status(CONFLICT).json({
@@ -72,7 +72,7 @@ export const getAllColors = async (req, res) => {
 export const getSingleColor = async (req, res) => {
   const { slug } = req.params;
 
-  const color = await Color.findOne({ slug });
+  const color = await Color.findOne({ slug: slug });
 
   if (!color) {
     return res.status(NOT_FOUND).json({
@@ -134,7 +134,7 @@ export const deleteColor = async (req, res) => {
   const { slug } = req.params;
 
   // throw error if color does not exist
-  const color = await Color.findOne({ slug });
+  const color = await Color.findOne({ slug: slug });
 
   if (!color) {
     return res.status(NOT_FOUND).json({
