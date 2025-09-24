@@ -72,7 +72,7 @@ export const getCoupon = async (req, res) => {
   const { coupon } = req.params;
    console.log(req.params);
 
-  const existingCoupon = await Coupon.findOne({ coupon });
+  const existingCoupon = await Coupon.findOne({ code: coupon });
     if (!existingCoupon) {
       return res.status(NOT_FOUND).json({
         status: '404. NOT FOUND',
@@ -95,7 +95,7 @@ export const updateCoupon = async (req, res) => {
   const { coupon } = req.params;
  
 
-  const existingCoupon = await Coupon.findOneAndUpdate({coupon}, {
+  const existingCoupon = await Coupon.findOneAndUpdate({ code: coupon }, {
     code: code.toUpperCase(),
     discount,
     startDate,
@@ -122,12 +122,12 @@ export const updateCoupon = async (req, res) => {
 }
 
 // @desc    delete coupon
-// @route   GET /api/v1/coupons/:coupon
+// @route   DELETE /api/v1/coupons/:coupon
 // @access  Private/Admin
 export const deleteCoupon = async (req, res) => {
   const { coupon } = req.params;
 
-  const existingCoupon = await Coupon.findOneAndDelete({coupon});
+  const existingCoupon = await Coupon.findOneAndDelete({ code: coupon });
   if (!existingCoupon) {
     return res.status(NOT_FOUND).json({
       status: '404. NOT FOUND',

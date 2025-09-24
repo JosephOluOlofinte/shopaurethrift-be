@@ -282,6 +282,14 @@ export const deleteOrder = async (req, res) => {
     });
   }
 
+  if (deletedOrder) {
+    await User.updateMany(
+      { orders: order._id },
+      { $pull: { orders: order._id } }
+    );
+  }
+
+
   res.status(OK).json({
     status: '200. OK',
     message: 'Order deleted successfully.',

@@ -9,6 +9,6 @@ couponRoutes.post('/', isLoggedIn, createCoupon)
 couponRoutes.get('/', isLoggedIn, getAllCoupons);
 couponRoutes.get('/:coupon', isLoggedIn, getCoupon);
 couponRoutes.put('/:coupon', isLoggedIn, updateCoupon);
-couponRoutes.put('/:coupon', isLoggedIn, deleteCoupon);
+couponRoutes.delete('/:coupon', isLoggedIn, deleteCoupon);
 
 export default couponRoutes;
