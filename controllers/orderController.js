@@ -312,3 +312,60 @@ export const deleteAllOrders = async (req, res) => {
     deletedOrders,
   });
 };
+
+// @desc get orders statistics
+// @route GET /api/v1/orders/stats
+// @access private/Admin
+export const getOrderStats = async (req, res) => {
+
+  // order stats
+  const orderStats = await Order.aggregate([
+    {
+      $group: {
+        _id: null,
+        totalSales: {
+          $sum: '$totalPrice',
+        },
+        minimumSales: {
+          $min: '$totalPrice',
+        },
+        maximumSales: {
+          $max: '$totalPrice',
+        },
+        avgSales: {
+          $avg: '$totalPrice',
+        },
+      },
+    },
+  ]);
+
+  // get the date
+  const date = new Date();
+  const today = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+
+  const todaySales = await Order.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: today,
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalSales: {
+          $sum: '$totalPrice',
+        },
+      },
+    },
+  ])
+
+  // send results
+  res.status(OK).json({
+    status: '200. OK',
+    message: 'Sum of orders fetched successfully',
+    orderStats,
+    todaySales,
+  });
+};
