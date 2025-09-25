@@ -1,8 +1,4 @@
-import {
-  CONFLICT,
-  CREATED,
-  NOT_FOUND,
-} from '../app/constants/httpStatusCodes.js';
+import { CONFLICT, CREATED, NOT_FOUND } from '../constants/httpStatusCodes.js';
 import Product from '../models/Product.js';
 import Review from '../models/Review.js';
 import User from '../models/User.js';
@@ -34,15 +30,14 @@ export const createReviews = async (req, res) => {
   if (hasReviewed) {
     return res.status(CONFLICT).json({
       status: 'error',
-      message: 'You have already reviewed this product!'
-    })
+      message: 'You have already reviewed this product!',
+    });
   }
 
-
   // generate the review slug
-    const userId = req.userAuthId;
-    const user = await User.findById(userId);
-    const reviewSlug = `${existingProduct.slug}/reviews/${user.slug}`;
+  const userId = req.userAuthId;
+  const user = await User.findById(userId);
+  const reviewSlug = `${existingProduct.slug}/reviews/${user.slug}`;
 
   // Create the review
   const review = await Review.create({
@@ -58,7 +53,7 @@ export const createReviews = async (req, res) => {
   await existingProduct.save();
 
   // push the review into user
-  user.reviews.push(review._id)
+  user.reviews.push(review._id);
   await user.save();
 
   return res.status(CREATED).json({

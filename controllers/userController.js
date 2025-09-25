@@ -3,9 +3,14 @@ import bcrypt from 'bcryptjs';
 import generateToken from '../utils/generateToken.js';
 import { getTokenFromHeader } from '../utils/getTokenFromHeader.js';
 import { verifyToken } from '../utils/verifyToken.js';
-import { BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from '../app/constants/httpStatusCodes.js';
+import {
+  BAD_REQUEST,
+  CREATED,
+  INTERNAL_SERVER_ERROR,
+  NOT_FOUND,
+  OK,
+} from '../constants/httpStatusCodes.js';
 import getAndValidateUser from '../utils/getAndValidateUser.js';
-
 
 // @desc get all users
 // @route GET /api/v1/users/
@@ -16,21 +21,21 @@ export const getAllUsers = async (req, res) => {
   if (users.length < 1) {
     return res.status(NOT_FOUND).json({
       status: 'error',
-      message: 'There are no registered users'
-    })
+      message: 'There are no registered users',
+    });
   }
 
   return res.status(OK).json({
     status: 'success',
     message: 'Users fetched successfully',
-    users
-  })
-}
+    users,
+  });
+};
 
 // @desc get one user
 // @route GET /api/v1/users/:username
 // @access Private/admin
-export const getOneUser = async(req, res) => {
+export const getOneUser = async (req, res) => {
   const { username } = req.params;
 
   //check if user exists
@@ -39,16 +44,17 @@ export const getOneUser = async(req, res) => {
   if (!user) {
     return res.status(NOT_FOUND).json({
       status: 'error',
-      message: 'There are no existing users with the provided credentials. getOneUser'
-    })
+      message:
+        'There are no existing users with the provided credentials. getOneUser',
+    });
   }
 
   return res.status(OK).json({
     status: 'success',
     message: 'User fetched succesffully',
-    user
-  })
-}
+    user,
+  });
+};
 
 // @desc Register user
 // @route POST /api/v1/users/register
@@ -147,13 +153,15 @@ export const loginUser = async (req, res) => {
 // @access Private
 export const getUserProfile = async (req, res) => {
   // find the user
-  const user = await getAndValidateUser(req.userAuthId, 'orders', 'The provided user does not exist')
+  const user = await getAndValidateUser(
+    req.userAuthId,
+    'orders',
+    'The provided user does not exist'
+  );
 
   return res.json({
     status: 'success',
     message: 'User profile fetched succesffully',
-    user
+    user,
   });
 };
-
-

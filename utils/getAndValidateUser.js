@@ -1,5 +1,5 @@
-import { NOT_FOUND } from "../app/constants/httpStatusCodes.js";
-import User from "../models/User.js";
+import { NOT_FOUND } from '../constants/httpStatusCodes.js';
+import User from '../models/User.js';
 
 const getAndValidateUser = async (userId, populateField, res, messageEdit) => {
   // get and validate user
@@ -9,9 +9,9 @@ const getAndValidateUser = async (userId, populateField, res, messageEdit) => {
       status: '404 ERROR',
       message: message,
     });
-    }
-    
-    return user;
+  }
+
+  return user;
 };
 
 export default getAndValidateUser;

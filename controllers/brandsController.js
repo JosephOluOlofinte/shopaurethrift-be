@@ -4,7 +4,7 @@ import {
   INTERNAL_SERVER_ERROR,
   NOT_FOUND,
   OK,
-} from '../app/constants/httpStatusCodes.js';
+} from '../constants/httpStatusCodes.js';
 import Brand from '../models/Brand.js';
 import convertNameToSlug from '../utils/convertNameToSlug.js';
 
@@ -39,7 +39,7 @@ export const createBrand = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    
+
     return res.status(INTERNAL_SERVER_ERROR).json({
       status: 'error',
       message: 'Something went wrong. Please try again.',
@@ -51,7 +51,10 @@ export const createBrand = async (req, res) => {
 // @route   POST /api/v1/brands
 // @access  Public
 export const getAllBrands = async (req, res) => {
-  const brands = await Brand.find().populate({path: 'products', select: 'name slug'});
+  const brands = await Brand.find().populate({
+    path: 'products',
+    select: 'name slug',
+  });
 
   if (!brands) {
     return res.status(NOT_FOUND).json({
@@ -117,7 +120,7 @@ export const updateBrand = async (req, res) => {
     {
       name: name.toLowerCase(),
       slug: convertNameToSlug(name),
-      image
+      image,
     },
     {
       new: true,

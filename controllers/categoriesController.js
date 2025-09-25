@@ -4,7 +4,7 @@ import {
   INTERNAL_SERVER_ERROR,
   NOT_FOUND,
   OK,
-} from '../app/constants/httpStatusCodes.js';
+} from '../constants/httpStatusCodes.js';
 import Category from '../models/Category.js';
 import convertNameToSlug from '../utils/convertNameToSlug.js';
 

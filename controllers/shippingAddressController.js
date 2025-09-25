@@ -3,7 +3,7 @@ import {
   INTERNAL_SERVER_ERROR,
   NOT_FOUND,
   OK,
-} from '../app/constants/httpStatusCodes.js';
+} from '../constants/httpStatusCodes.js';
 import User from '../models/User.js';
 import ShippingAddress from '../models/ShippingAddress.js';
 import getAndValidateUser from '../utils/getAndValidateUser.js';
@@ -18,7 +18,6 @@ export const createShippingAddress = async (req, res) => {
     'shippingAddresses',
     'You must be logged in to create a shipping address!'
   );
-    
 
   // destructure the payload
   const {
@@ -35,13 +34,16 @@ export const createShippingAddress = async (req, res) => {
 
   // check if there is an existing address with the nickname
   const existingAddress = user.shippingAddresses.find((address) => {
-    return address.addressNickname.toLowerCase() === addressNickname.toLowerCase();
-  })
+    return (
+      address.addressNickname.toLowerCase() === addressNickname.toLowerCase()
+    );
+  });
 
   if (existingAddress) {
     return res.status(CONFLICT).json({
       status: '409 CONFLICT',
-      message: 'You already have an existing address with the provided nickname.',
+      message:
+        'You already have an existing address with the provided nickname.',
     });
   }
 
@@ -249,7 +251,7 @@ export const deleteShippingAddress = async (req, res) => {
     return res.status(OK).json({
       status: '200 OK',
       message: 'Address deleted successfully.',
-      deletedAddress
+      deletedAddress,
     });
   } catch (error) {
     return res.status(INTERNAL_SERVER_ERROR).json({

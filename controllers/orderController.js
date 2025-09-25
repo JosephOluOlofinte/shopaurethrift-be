@@ -1,10 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
-import {
-  BAD_REQUEST,
-  NOT_FOUND,
-  OK,
-} from '../app/constants/httpStatusCodes.js';
+import { BAD_REQUEST, NOT_FOUND, OK } from '../constants/httpStatusCodes.js';
 import Order from '../models/Order.js';
 // import Product from '../models/Product.js';
 import User from '../models/User.js';
@@ -43,8 +39,6 @@ export const createOrder = async (req, res) => {
     }
   }
 
-  
-
   // get discount
   const discount = coupon ? existingCoupon.discount / 100 : 0;
   if (discount > 0) {
@@ -58,8 +52,6 @@ export const createOrder = async (req, res) => {
       discount: 'No discount has been added to your order',
     });
   }
-  
-
 
   // get the payload (customer, orderItems, shippingAddress, totalPrice)
   const { orderItems, shippingAddress, totalPrice } = req.body;
@@ -124,10 +116,12 @@ export const createOrder = async (req, res) => {
       shippingAddress: address,
       coupon,
       discount: `${coupon ? `${existingCoupon.discount}%` : 'Not applicable'}`,
-      totalPrice: existingCoupon ? totalPrice - totalPrice * discount : totalPrice,
+      totalPrice: existingCoupon
+        ? totalPrice - totalPrice * discount
+        : totalPrice,
     });
 
-    console.log(order)
+    console.log(order);
 
     // push order into user
     user.orders.push(order._id);
@@ -161,7 +155,9 @@ export const createOrder = async (req, res) => {
       cancel_url: 'https://localhost:4040/',
     });
 
-    res.status(OK).json({ status: '200 OK', messages, order, url: session.url });
+    res
+      .status(OK)
+      .json({ status: '200 OK', messages, order, url: session.url });
   } catch (err) {
     if (err.code === 11000) {
       // duplicate key error from Mongo
@@ -182,7 +178,7 @@ export const getAllOrders = async (req, res) => {
   // fetch all orders
   const orders = await Order.find();
 
-  if (orders <= 0 ) {
+  if (orders <= 0) {
     return res.status(NOT_FOUND).json({
       status: '404 NOT FOUND',
       message: 'There are no orders yet',
@@ -289,7 +285,6 @@ export const deleteOrder = async (req, res) => {
     );
   }
 
-
   res.status(OK).json({
     status: '200. OK',
     message: 'Order deleted successfully.',
@@ -297,12 +292,10 @@ export const deleteOrder = async (req, res) => {
   });
 };
 
-
 // @desc delete all orders
 // @route DELETE /api/v1/orders/
 // @access private/Admin
 export const deleteAllOrders = async (req, res) => {
-
   // find the order and delete it from db
   const deletedOrders = await Order.deleteMany({});
 

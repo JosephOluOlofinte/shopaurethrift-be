@@ -4,7 +4,7 @@ import {
   FORBIDDEN,
   NOT_FOUND,
   OK,
-} from '../app/constants/httpStatusCodes.js';
+} from '../constants/httpStatusCodes.js';
 import Coupon from '../models/Coupon.js';
 
 // @desc    create new coupon
@@ -64,28 +64,27 @@ export const getAllCoupons = async (req, res) => {
   });
 };
 
-
 // @desc    fetch one coupon
 // @route   GET /api/v1/coupons/:coupon
 // @access  Private/Admin
 export const getCoupon = async (req, res) => {
   const { coupon } = req.params;
-   console.log(req.params);
+  console.log(req.params);
 
   const existingCoupon = await Coupon.findOne({ code: coupon });
-    if (!existingCoupon) {
-      return res.status(NOT_FOUND).json({
-        status: '404. NOT FOUND',
-        message: 'Coupon does not exist',
-      });
-    }
+  if (!existingCoupon) {
+    return res.status(NOT_FOUND).json({
+      status: '404. NOT FOUND',
+      message: 'Coupon does not exist',
+    });
+  }
 
   return res.status(OK).json({
     status: '200. OK',
     message: 'Coupon fetched successfully',
     existingCoupon,
   });
-}
+};
 
 // @desc    fetch all coupons
 // @route   PUT /api/v1/coupons/:coupon
@@ -93,17 +92,19 @@ export const getCoupon = async (req, res) => {
 export const updateCoupon = async (req, res) => {
   const { code, startDate, endDate, discount } = req.body;
   const { coupon } = req.params;
- 
 
-  const existingCoupon = await Coupon.findOneAndUpdate({ code: coupon }, {
-    code: code.toUpperCase(),
-    discount,
-    startDate,
-    endDate
-  },
+  const existingCoupon = await Coupon.findOneAndUpdate(
+    { code: coupon },
     {
-    new: true,
-  });
+      code: code.toUpperCase(),
+      discount,
+      startDate,
+      endDate,
+    },
+    {
+      new: true,
+    }
+  );
   if (!existingCoupon) {
     return res.status(NOT_FOUND).json({
       status: '404. NOT FOUND',
@@ -117,9 +118,7 @@ export const updateCoupon = async (req, res) => {
     message: 'Coupon updated successfully',
     existingCoupon,
   });
-
-  
-}
+};
 
 // @desc    delete coupon
 // @route   DELETE /api/v1/coupons/:coupon
@@ -141,5 +140,4 @@ export const deleteCoupon = async (req, res) => {
     message: 'Coupon deleted successfully',
     existingCoupon,
   });
-  
-}
+};

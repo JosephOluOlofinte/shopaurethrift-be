@@ -3,7 +3,7 @@ import {
   CREATED,
   NOT_FOUND,
   OK,
-} from '../app/constants/httpStatusCodes.js';
+} from '../constants/httpStatusCodes.js';
 import Brand from '../models/Brand.js';
 import Category from '../models/Category.js';
 import Product from '../models/Product.js';
@@ -13,16 +13,8 @@ import convertNameToSlug from '../utils/convertNameToSlug.js';
 // @route   POST /api/v1/products/create-new
 // @access  Private/Admin
 export const createNewProduct = async (req, res) => {
-  const {
-    name,
-    description,
-    brand,
-    category,
-    sizes,
-    colors,
-    price,
-    totalQty,
-  } = req.body;
+  const { name, description, brand, category, sizes, colors, price, totalQty } =
+    req.body;
 
   // check if product exists
   const productExists = await Product.findOne({ name });
@@ -95,7 +87,6 @@ export const createNewProduct = async (req, res) => {
     product,
   });
 };
-
 
 // @desc    fetch all products
 // @route   get /api/v1/products/get-products
@@ -200,8 +191,6 @@ export const getProducts = async (req, res) => {
   });
 };
 
-
-
 // @desc    fetch single products
 // @route   get /api/v1/products/:slug
 // @access  Public
@@ -223,7 +212,6 @@ export const getSingleProduct = async (req, res) => {
     product,
   });
 };
-
 
 // @desc    update single product
 // @route   PUT /api/v1/products/:slug
@@ -278,8 +266,6 @@ export const updateProduct = async (req, res) => {
     updatedProduct,
   });
 };
-
-
 
 // @desc    delete single product
 // @route   DELETE /api/v1/products/:slug

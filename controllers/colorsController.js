@@ -4,7 +4,7 @@ import {
   INTERNAL_SERVER_ERROR,
   NOT_FOUND,
   OK,
-} from '../app/constants/httpStatusCodes.js';
+} from '../constants/httpStatusCodes.js';
 import Color from '../models/Color.js';
 import convertNameToSlug from '../utils/convertNameToSlug.js';
 
@@ -39,7 +39,7 @@ export const createColor = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    
+
     return res.status(INTERNAL_SERVER_ERROR).json({
       status: 'error',
       message: 'Something went wrong. Please try again.',
