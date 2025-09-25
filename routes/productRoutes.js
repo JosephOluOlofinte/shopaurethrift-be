@@ -1,11 +1,24 @@
 import express from 'express';
-import { createNewProduct, deleteProduct, getProducts, getSingleProduct, updateProduct } from '../controllers/productController.js';
+import {
+  createNewProduct,
+  deleteProduct,
+  getProducts,
+  getSingleProduct,
+  updateProduct,
+} from '../controllers/productController.js';
 import { isLoggedIn } from '../middlewares/isLoggedIn.js';
 import upload from '../config/fileUpload.js';
+import { isAdmin } from '../middlewares/isAdmin.js';
 
 const productRoutes = express.Router();
 
-productRoutes.post('/', isLoggedIn, upload.array('files'), createNewProduct);
+productRoutes.post(
+  '/',
+  isLoggedIn,
+  isAdmin,
+  upload.array('files'),
+  createNewProduct
+);
 productRoutes.get('/', getProducts);
 productRoutes.get('/:slug', getSingleProduct);
 productRoutes.put('/:slug', isLoggedIn, updateProduct);

@@ -44,7 +44,19 @@ const UserSchema = new Schema(
         ref: 'Review',
       },
     ],
+    isModerator: {
+      type: Boolean,
+      default: false,
+    },
     isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    isSuperAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    isDeactivated: {
       type: Boolean,
       default: false,
     },

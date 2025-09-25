@@ -39,7 +39,7 @@ export const getOneUser = async (req, res) => {
   const { username } = req.params;
 
   //check if user exists
-  const user = await User.findOne({ username }).populate('reviews');
+  const user = await User.findOne({ username: username }).populate('reviews');
 
   if (!user) {
     return res.status(NOT_FOUND).json({
@@ -64,7 +64,7 @@ export const registerUser = async (req, res) => {
   const { fullname, username, email, password } = req.body;
 
   // Check if user exists and refuse duplicates
-  const usernameExists = await User.findOne({ username });
+  const usernameExists = await User.findOne({ username: username });
 
   if (usernameExists) {
     return res.status(BAD_REQUEST).json({
@@ -119,7 +119,7 @@ export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   // Check if user exists by email
-  const existingUser = await User.findOne({ email }).select('+password');
+  const existingUser = await User.findOne({ email: email }).select('+password');
   if (!existingUser) {
     return res.status(NOT_FOUND).json({
       status: 'Error',
@@ -165,3 +165,50 @@ export const getUserProfile = async (req, res) => {
     user,
   });
 };
+
+
+// @desc User profile
+// @route PUT /api/v1/users/profile/update
+// @access Private
+export const updateProfile = async (req, res) => {
+  // destructure incoming data
+  const { fullname, email, password } = req.body;
+  // find the user
+  const user = await getAndValidateUser(req.userAuthId, 'You must be logged in to access this page');
+
+  // update the user profile
+  const updatedUser = await User.findByIdAndUpdate(user._id, {
+    fullname
+  },
+    {
+      new: true,
+    }
+  );
+
+  return res.status(OK).json({
+    status: '200. OK',
+    message: 'Profile updated succesffully',
+    updatedUser
+  })
+}
+
+// @desc User profile
+// @route PUT /api/v1/users/edit/make-admin
+// @access Private/superAdmin
+export const makeUserAdmin = async (req, res) => {
+  // destructure incoming data
+  const { username, isAdmin, isSuperAdmin, isModerator } = req.body;
+
+  // update the user profile
+  const user = await User.findOneAndUpdate(
+    { username: username },
+    { isAdmin, isSuperAdmin, isModerator },
+    { new: true }
+  );
+
+  return res.status(OK).json({
+    status: '200. OK',
+    message: 'User updated succesffully',
+    user
+  })
+}

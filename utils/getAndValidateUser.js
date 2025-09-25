@@ -1,7 +1,7 @@
 import { NOT_FOUND } from '../constants/httpStatusCodes.js';
 import User from '../models/User.js';
 
-const getAndValidateUser = async (userId, populateField, res, messageEdit) => {
+const getAndValidateUser = async (userId, res, messageEdit, populateField = '') => {
   // get and validate user
   const user = await User.findById(userId).populate(populateField);
   if (!user) {
