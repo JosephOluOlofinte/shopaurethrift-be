@@ -13,6 +13,9 @@ import convertNameToSlug from '../utils/convertNameToSlug.js';
 // @route   POST /api/v1/products/create-new
 // @access  Private/Admin
 export const createNewProduct = async (req, res) => {
+  
+  const convertedImages = req.files.map(file => file.path);
+
   const { name, description, brand, category, sizes, colors, price, totalQty } =
     req.body;
 
@@ -64,6 +67,7 @@ export const createNewProduct = async (req, res) => {
     sizes,
     colors,
     user: req.userAuthId,
+    images: convertedImages,
     price,
     totalQty,
   });

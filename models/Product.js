@@ -46,7 +46,6 @@ const ProductSchema = new Schema(
       {
         type: String,
         required: true,
-        default: 'https://via.placeholder.com/150',
       },
     ],
 

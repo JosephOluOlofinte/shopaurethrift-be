@@ -12,7 +12,9 @@ import convertNameToSlug from '../utils/convertNameToSlug.js';
 // @route   POST /api/v1/categories/create-new
 // @access  Private/Admin
 export const createCategory = async (req, res) => {
-  const { name, image } = req.body;
+  const convertedImg = req.file.path;
+
+  const { name } = req.body;
 
   // check if categorye exists
   const existingCategory = await Category.findOne({ name: name });
@@ -30,7 +32,7 @@ export const createCategory = async (req, res) => {
       name: name.toLowerCase(),
       slug: convertNameToSlug(name),
       user: req.userAuthId,
-      image,
+      image: convertedImg,
     });
 
     return res.status(CREATED).json({
@@ -44,6 +46,7 @@ export const createCategory = async (req, res) => {
       message: 'Something went wrong. Please try again.',
     });
   }
+
 };
 
 // @desc    fetch all category
